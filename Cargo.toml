@@ -1,0 +1,6 @@
+[package]
+name = "rac"
+version = "0.1.0"
+authors = ["Lukas Pustina <lukas@pustina.net>"]
+
+[dependencies]
