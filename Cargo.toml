@@ -1,6 +1,16 @@
 [package]
-name = "rac"
-version = "0.1.0"
+name = "rat"
+version = "0.0.1"
 authors = ["Lukas Pustina <lukas@pustina.net>"]
 
+[[bin]]
+name = "rat"
+path = "src/main.rs"
+
 [dependencies]
+curl = "0.4"
+itertools = "0.5"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
+toml = "0.3"

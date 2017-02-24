@@ -1,33 +1,45 @@
-# Rest Api Client
+# Rest Api Tool
 
 ## Clients
 
 ```
-rac pocket auth
-rac pocket list
-rac pocket rm <id>,<id>
+rat pocket auth
+rat pocket list
+rat pocket rm <id>,<id>
 
-rac centerdevice status
-rac centerdevice status details
+rat centerdevice status
+rat centerdevice status details
 
-rac centerdevice auth
-rac centerdevice upload <file>
-rac centerdevice search <search>
-rac centerdevice download <document-id>
+rat centerdevice auth
+rat centerdevice upload <file>
+rat centerdevice search <search>
+rat centerdevice download <document-id>
 
-rac elasticsearch status -- curl -s http://es-m-05:9200/_cluster/health?level=shards
-rac elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
+rat elasticsearch status -- curl -s http://es-m-05:9200/_cluster/health?level=shards
+rat elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
+
+rat slack send <channel> <message>
 ```
 
 
 ## Todos
 
-* [ ] Fill out Cargo.toml
+* [ ] Error Chain
 
-* [ ] Clap bash and zsh autocompletion
+* [ ] Clap
+
+    * [ ] bash and zsh autocompletion
+
+* [ ] Fill out Cargo.toml
 
 
 ## References
+
+### Pocket
+
+* [Pocket Auth](http://www.jamesfmackenzie.com/getting-started-with-the-pocket-developer-api/)
+
+### Rust
 
 * [Rust and Rest](http://lucumr.pocoo.org/2016/7/10/rust-rest/)
 
