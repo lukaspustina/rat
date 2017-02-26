@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod list;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -7,3 +8,4 @@ pub struct Config {
 }
 
 pub use self::auth::auth;
+pub use self::list::list;
