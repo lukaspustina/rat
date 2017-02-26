@@ -5,6 +5,7 @@ use std::io;
 use std::str;
 
 static HEADERS: &'static [&'static str] = &["X-Accept: application/json", "Content-Type: application/json"];
+static REDIRECT_URI: &'static str = "https://lukaspustina.github.io/rat/redirects/pocket.html";
 
 #[derive(Serialize, Debug)]
 struct Step1<'a> {
@@ -32,11 +33,10 @@ struct Step3Result {
 #[allow(unused_variables)] // for status codes
 pub fn auth(config: &Config) {
     let consumer_key = &config.consumer_key;
-    let redirect_uri = &config.redirect_uri;
 
     // Step 1 -- get code
     let mut buffer = Vec::new();
-    let step_1 = Step1 { consumer_key: consumer_key, redirect_uri: redirect_uri};
+    let step_1 = Step1 { consumer_key: consumer_key, redirect_uri: REDIRECT_URI};
     // TODO: Only continue if 200
     let step_1_status_code = curl(
         "https://getpocket.com/v3/oauth/request",
@@ -50,7 +50,7 @@ pub fn auth(config: &Config) {
     // Step 2 -- Wait for Web UI authentication
     println!(
         "Please authenticate at https://getpocket.com/auth/authorize?request_token={}&redirect_uri={} and then press return ...",
-        step_1_result.code, redirect_uri);
+        step_1_result.code, REDIRECT_URI);
     let mut input = String::new();
     let _ = io::stdin().read_line(&mut input);
 
