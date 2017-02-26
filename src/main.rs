@@ -7,7 +7,8 @@ use std::path::Path;
 
 fn main() {
     let config = Config::from_file(Path::new("rat.toml")).unwrap();
+    println!("Config: {:?}", config);
 
     centerdevice::status(&config.centerdevice);
-    pocket::auth(&config.pocket);
+    //pocket::auth(&config.pocket);
 }
