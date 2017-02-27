@@ -1,9 +1,12 @@
 use super::Config;
 use config::OutputFormat;
 use net::{curl_json, HttpVerb};
+
+use clap::{App, ArgMatches, SubCommand};
 use serde_json;
 use std::str;
 
+pub const NAME: &'static str = "status";
 
 #[derive(Deserialize, Debug)]
 enum Status {
@@ -101,7 +104,16 @@ struct CenterDeviceStatus {
     PingDom: PingDom,
 }
 
-pub fn status(config: &Config) {
+pub fn build_sub_cli() -> App<'static, 'static> {
+    SubCommand::with_name(NAME)
+        .about("Gets public centerdevice status from status server")
+}
+
+pub fn call(_: Option<&ArgMatches>, config: &Config) {
+    status(config);
+}
+
+fn status(config: &Config) {
     let json = get_centerdevice_status_json();
     output(&json, &config.output_format);
 }

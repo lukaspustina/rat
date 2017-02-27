@@ -24,13 +24,15 @@ rat slack send <channel> <message>
 
 ## Todos
 
-* [ ] Error Chain
+* [X] Clap
 
-* [ ] Clap
-
-    * [ ] bash and zsh autocompletion
+    * [X] bash and zsh autocompletion
 
 * [ ] Fill out Cargo.toml
+
+* [ ] Error Chain
+
+* [ ] Brew and deb
 
 
 ## References

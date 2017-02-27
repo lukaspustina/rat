@@ -1,8 +1,12 @@
 use super::Config;
 use net::{curl, HttpVerb};
+
+use clap::{App, ArgMatches, SubCommand};
 use serde_json;
 use std::io;
 use std::str;
+
+pub const NAME: &'static str = "auth";
 
 static HEADERS: &'static [&'static str] = &["X-Accept: application/json", "Content-Type: application/json"];
 static REDIRECT_URI: &'static str = "https://lukaspustina.github.io/rat/redirects/pocket.html";
@@ -30,8 +34,17 @@ struct Step3Result {
     username: String,
 }
 
+pub fn build_sub_cli() -> App<'static, 'static> {
+    SubCommand::with_name(NAME)
+        .about("Runs authentication process to generate access token")
+}
+
+pub fn call(_: Option<&ArgMatches>, config: &Config) {
+    auth(config);
+}
+
 #[allow(unused_variables)] // for status codes
-pub fn auth(config: &Config) {
+fn auth(config: &Config) {
     let consumer_key = &config.consumer_key;
 
     // Step 1 -- get code

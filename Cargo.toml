@@ -8,6 +8,7 @@ name = "rat"
 path = "src/main.rs"
 
 [dependencies]
+clap = "2"
 curl = "0.4"
 itertools = "0.5"
 serde = "0.9"

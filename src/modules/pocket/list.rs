@@ -1,7 +1,11 @@
 use super::Config;
 use net::{curl, HttpVerb};
+
+use clap::{App, ArgMatches, SubCommand};
 use serde_json;
 use std::str;
+
+pub const NAME: &'static str = "list";
 
 static HEADERS: &'static [&'static str] = &["Content-Type: application/json"];
 
@@ -11,8 +15,17 @@ struct Request<'a> {
     access_token: &'a str,
 }
 
+pub fn build_sub_cli() -> App<'static, 'static> {
+    SubCommand::with_name(NAME)
+        .about("List saved articles")
+}
+
+pub fn call(_: Option<&ArgMatches>, config: &Config) {
+    list(config);
+}
+
 #[allow(unused_variables)] // for status codes
-pub fn list(config: &Config) {
+fn list(config: &Config) {
 
     let mut buffer = Vec::new();
     let request = Request{ consumer_key: &config.consumer_key, access_token: &config.access_token.as_ref().unwrap() };
