@@ -1,5 +1,7 @@
-use clap::{App, ArgMatches, SubCommand};
 use config::OutputFormat;
+use errors::*;
+
+use clap::{App, ArgMatches, SubCommand};
 
 pub const NAME: &'static str = "centerdevice";
 
@@ -16,17 +18,12 @@ pub fn build_sub_cli() -> App<'static, 'static> {
         .subcommand(status::build_sub_cli())
 }
 
-pub fn call(cli_args: Option<&ArgMatches>, config: &Config) {
-    match cli_args.unwrap().subcommand_name() {
-        Some(subcommand) => {
-            match subcommand {
-                status::NAME => status::call(cli_args.unwrap().subcommand_matches(subcommand), &config),
-                _ => {}
-            }
-        },
-        None => {
-            println!("No {} command specified. Aborting.", NAME);
-            return;
-        }
+pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
+    let subcommand = cli_args.unwrap();
+    let subcommand_name = subcommand.subcommand_name().ok_or(ErrorKind::NoSubcommandSpecified(NAME.to_string()))?;
+    match subcommand_name {
+        status::NAME => status::call(subcommand.subcommand_matches(subcommand_name), &config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        _ => Ok(())
     }
 }

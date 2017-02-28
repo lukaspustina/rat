@@ -78,5 +78,6 @@ pub fn curl_json(
     if let Some(headers) = headers {
         json_headers.extend(headers.iter());
     }
+
     curl(url, verb, Some(&json_headers), input, output)
 }

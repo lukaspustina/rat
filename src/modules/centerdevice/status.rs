@@ -8,6 +8,15 @@ use std::str;
 
 pub const NAME: &'static str = "status";
 
+error_chain! {
+    errors {
+       CenterDeviceStatusFailed {
+            description("failed to get CenterDevice status")
+            display("failed to get CenterDevice status")
+        }
+    }
+}
+
 #[derive(Deserialize, Debug)]
 enum Status {
     Okay,
@@ -109,30 +118,30 @@ pub fn build_sub_cli() -> App<'static, 'static> {
         .about("Gets public centerdevice status from status server")
 }
 
-pub fn call(_: Option<&ArgMatches>, config: &Config) {
-    status(config);
+pub fn call(_: Option<&ArgMatches>, config: &Config) -> Result<()> {
+    status(config).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
 }
 
-fn status(config: &Config) {
-    let json = get_centerdevice_status_json();
-    output(&json, &config.output_format);
+fn status(config: &Config) -> Result<()> {
+    let json = get_centerdevice_status_json()?;
+    output(&json, &config.output_format)
 }
 
-fn get_centerdevice_status_json() -> String {
+fn get_centerdevice_status_json() -> Result<String> {
     let mut buffer = Vec::new();
     let url = "http://status.centerdevice.de/details.json";
 
-    curl_json(url, HttpVerb::GET, None, None, Some(&mut buffer)).unwrap();
-    let json = str::from_utf8(&buffer).unwrap();
+    curl_json(url, HttpVerb::GET, None, None, Some(&mut buffer)).chain_err(|| "Curl failed")?;
+    let json = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
 
-    json.to_string()
+    Ok(json.to_string())
 }
 
 
-fn output(json: &str, format: &OutputFormat) {
+fn output(json: &str, format: &OutputFormat) -> Result<()> {
     match *format {
         OutputFormat::HUMAN => {
-            let status: CenterDeviceStatus = serde_json::from_str(&json).unwrap();
+            let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
             match status.Status {
                 Status::Okay => println!("CenterDevice status is {:?}.", status.Status),
                 Status::Warning|Status::Failed => {
@@ -145,9 +154,12 @@ fn output(json: &str, format: &OutputFormat) {
                     println!("+ PingDom: {:?}", status.PingDom.Status);
                 }
             }
+            Ok(())
         }
         OutputFormat::JSON => {
-            println!("{}", json)
+            println!("{}", json);
+            Ok(())
         }
     }
 }
+

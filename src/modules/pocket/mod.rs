@@ -1,3 +1,5 @@
+use errors::*;
+
 use clap::{App, ArgMatches, SubCommand};
 
 pub const NAME: &'static str = "pocket";
@@ -18,18 +20,14 @@ pub fn build_sub_cli() -> App<'static, 'static> {
         .subcommand(list::build_sub_cli())
 }
 
-pub fn call(cli_args: Option<&ArgMatches>, config: &Config) {
-    match cli_args.unwrap().subcommand_name() {
-        Some(subcommand) => {
-            match subcommand {
-                auth::NAME => auth::call(cli_args.unwrap().subcommand_matches(subcommand), &config),
-                list::NAME => list::call(cli_args.unwrap().subcommand_matches(subcommand), &config),
-                _ => {}
-            }
-        },
-        None => {
-            println!("No {} command specified. Aborting.", NAME);
-            return;
-        }
+pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
+    let subcommand = cli_args.unwrap();
+    let subcommand_name = subcommand.subcommand_name().ok_or(ErrorKind::NoSubcommandSpecified(NAME.to_string()))?;
+    match subcommand_name {
+        auth::NAME => auth::call(subcommand.subcommand_matches(subcommand_name), &config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        list::NAME => list::call(subcommand.subcommand_matches(subcommand_name), &config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        _ => Ok(())
     }
 }
