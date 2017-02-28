@@ -28,11 +28,15 @@ rat slack send <channel> <message>
 
     * [X] bash and zsh autocompletion
 
-* [ ] Fill out Cargo.toml
+* [X] Fill out Cargo.toml
 
 * [ ] Error Chain
 
 * [ ] Brew and deb
+
+* [ ] Tests
+
+    * [ ] Add Badges for Travis to Cargo.toml
 
 
 ## References

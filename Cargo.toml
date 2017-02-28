@@ -2,6 +2,17 @@
 name = "rat"
 version = "0.0.1"
 authors = ["Lukas Pustina <lukas@pustina.net>"]
+description = "REST API tool -- qeuery various REST APIs comfortably"
+repository = "https://github.com/lukaspustina/rat "
+readme = "README.md"
+license = "MIT"
+keywords = ["REST", "API", "CenterDevice", "Pocket", "ElasticSearch", "Slack"]
+include = [
+  "README.md",
+  "LICENSE",
+  "**/*.rs",
+  "Cargo.toml",
+]
 
 [[bin]]
 name = "rat"
@@ -15,3 +26,4 @@ serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
 toml = "0.3"
+
