@@ -1,15 +1,30 @@
 # Rest Api Tool
 
-## Clients
+## Available Clients
 
 ```
 rat pocket auth
 rat pocket list
-rat pocket rm <id>,<id>
 
 rat centerdevice status
-rat centerdevice status details
+```
 
+## Installation
+
+### macOS with Homebrew
+
+```
+brew install lukaspustina/os/rat
+```
+
+----
+
+## Clients to Come
+
+```
+rat pocket rm <id>,<id>
+
+rat centerdevice status details
 rat centerdevice auth
 rat centerdevice upload <file>
 rat centerdevice search <search>
@@ -32,7 +47,11 @@ rat slack send <channel> <message>
 
 * [X] Error Chain
 
-* [ ] Brew and deb
+* [ ] Distributions
+
+    * [X] Brew
+
+    * [ ] Debian
 
 * [ ] Travis
 
@@ -40,6 +59,8 @@ rat slack send <channel> <message>
 
     * [ ] Add Badges for Travis to Cargo.toml
 
+
+----
 
 ## References
 
