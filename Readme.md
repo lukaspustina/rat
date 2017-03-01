@@ -47,13 +47,15 @@ rat slack send <channel> <message>
 
 * [X] Error Chain
 
-* [ ] Distributions
+* [X] Distributions
 
     * [X] Brew
 
-    * [ ] Debian
+    * [X] Debian
 
 * [ ] Travis
+
+    * [ ] packagecloud.io
 
 * [ ] Tests
 
