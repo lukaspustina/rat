@@ -30,9 +30,11 @@ rat slack send <channel> <message>
 
 * [X] Fill out Cargo.toml
 
-* [ ] Error Chain
+* [X] Error Chain
 
 * [ ] Brew and deb
+
+* [ ] Travis
 
 * [ ] Tests
 
