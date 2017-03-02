@@ -35,7 +35,7 @@ brew install lukaspustina/os/rat
 
 ##### Filter articles for ids and titles, search for Rust in title, make comma seperated list
 
-rat pocket list | jq -r '.list | .[] | { title: .given_title, id: .item_id } | select(.title | test("Rust")) | .id' | paste -s -d , -
+`rat pocket list | jq -r '.list | .[] | { title: .given_title, id: .item_id } | select(.title | test("Rust")) | .id' | paste -s -d , -`
 
 ----
 
@@ -58,6 +58,7 @@ rat slack send <channel> <message>
 rat bosun browse
 rat bosun show-incidents --open
 rat bosun close-incidents --ids  <id>,<id> --message "Just because ..."
+rat bosun emit <metric datum>
 ```
 
 
