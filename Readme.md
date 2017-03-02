@@ -6,7 +6,7 @@
 rat pocket auth
 rat pocket list
 
-rat centerdevice status
+rat centerdevice status [--details]
 ```
 
 ## Installation
@@ -24,7 +24,6 @@ brew install lukaspustina/os/rat
 ```
 rat pocket rm --ids <id>,<id>
 
-rat centerdevice status details
 rat centerdevice browse-status
 rat centerdevice auth
 rat centerdevice upload <file>

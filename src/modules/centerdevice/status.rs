@@ -2,7 +2,7 @@ use super::Config;
 use config::OutputFormat;
 use net::{curl_json, HttpVerb};
 
-use clap::{App, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
 use std::str;
 
@@ -116,15 +116,19 @@ struct CenterDeviceStatus {
 pub fn build_sub_cli() -> App<'static, 'static> {
     SubCommand::with_name(NAME)
         .about("Gets public centerdevice status from status server")
+        .arg(Arg::with_name("details")
+            .long("details")
+            .help("Show detailed output"))
 }
 
-pub fn call(_: Option<&ArgMatches>, config: &Config) -> Result<()> {
-    status(config).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
+pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
+    let details = args.ok_or(false).unwrap().is_present("details");
+    status(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
 }
 
-fn status(config: &Config) -> Result<()> {
+fn status(config: &Config, details: bool) -> Result<()> {
     let json = get_centerdevice_status_json()?;
-    output(&json, &config.output_format)
+    output(&json, &config.output_format, details)
 }
 
 fn get_centerdevice_status_json() -> Result<String> {
@@ -138,13 +142,13 @@ fn get_centerdevice_status_json() -> Result<String> {
 }
 
 
-fn output(json: &str, format: &OutputFormat) -> Result<()> {
+fn output(json: &str, format: &OutputFormat, details: bool) -> Result<()> {
     match *format {
         OutputFormat::HUMAN => {
             let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
-            match status.Status {
-                Status::Okay => println!("CenterDevice status is {:?}.", status.Status),
-                Status::Warning|Status::Failed => {
+            match (&status.Status, details) {
+                (&Status::Okay, false) => println!("CenterDevice status is {:?}.", status.Status),
+                (&Status::Okay, true) | (&Status::Warning, _) | (&Status::Failed, _) => {
                     println!("CenterDevice status is {:?}.", status.Status);
                     println!("+ Rest: {:?}", status.Rest.Status);
                     println!("+ Auth: {:?}", status.Auth.Status);
