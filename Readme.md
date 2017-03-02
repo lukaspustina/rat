@@ -18,6 +18,25 @@ rat centerdevice browse-status [--details]
 brew install lukaspustina/os/rat
 ```
 
+## Usage
+
+
+### Pocket
+
+#### List
+
+##### Filter articles for ids and titles
+
+`rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id }'`
+
+##### Filter articles for ids and titles and search for Rust in title
+
+`rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id } | select(.title | test("Rust"))'`
+
+##### Filter articles for ids and titles, search for Rust in title, make comma seperated list
+
+rat pocket list | jq -r '.list | .[] | { title: .given_title, id: .item_id } | select(.title | test("Rust")) | .id' | paste -s -d , -
+
 ----
 
 ## Clients to Come
