@@ -22,18 +22,24 @@ brew install lukaspustina/os/rat
 ## Clients to Come
 
 ```
-rat pocket rm <id>,<id>
+rat pocket rm --ids <id>,<id>
 
 rat centerdevice status details
+rat centerdevice browse-status
 rat centerdevice auth
 rat centerdevice upload <file>
 rat centerdevice search <search>
 rat centerdevice download <document-id>
 
+rat elasticsearch browse
 rat elasticsearch status -- curl -s http://es-m-05:9200/_cluster/health?level=shards
 rat elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
 
 rat slack send <channel> <message>
+
+rat bosun browse
+rat bosun show-incidents --open
+rat bosun close-incidents --ids  <id>,<id> --message "Just because ..."
 ```
 
 
