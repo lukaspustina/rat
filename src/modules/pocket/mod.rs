@@ -6,6 +6,7 @@ pub const NAME: &'static str = "pocket";
 
 mod auth;
 mod list;
+mod search;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -18,6 +19,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
         .about("Pocket: When you find something you want to view later, put it in Pocket.")
         .subcommand(auth::build_sub_cli())
         .subcommand(list::build_sub_cli())
+        .subcommand(search::build_sub_cli())
 }
 
 pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
@@ -27,6 +29,8 @@ pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         auth::NAME => auth::call(subcommand.subcommand_matches(subcommand_name), &config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         list::NAME => list::call(subcommand.subcommand_matches(subcommand_name), &config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        search::NAME => search::call(subcommand.subcommand_matches(subcommand_name), &config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         _ => Ok(())
     }

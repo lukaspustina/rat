@@ -4,7 +4,8 @@
 
 ```
 rat pocket auth
-rat pocket list
+rat pocket list [--details] --tags <tag>,<tag> [--state unread|archive|all] [--sort newest|oldest|title|site ]
+rat pocket search [--details] --tags <tag>,<tag> [--state unread|archive|all] [--sort newest|oldest|title|site ] <in title or url>
 
 rat centerdevice status [--details]
 rat centerdevice browse-status [--details]
@@ -23,26 +24,34 @@ brew install lukaspustina/os/rat
 
 ### Pocket
 
+#### Authentication
+
+consumer_key
+
+auth_key
+
 #### List
 
 ##### Filter articles for ids and titles
 
 `rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id }'`
 
-##### Filter articles for ids and titles and search for Rust in title
+##### Filter articles for ids and titles and search for Rust in title and URL
 
-`rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id } | select(.title | test("Rust"))'`
+* `rat pocket search Rust | jq -r '.list | .[] | { title: .given_title, id: .item_id }'`
 
-##### Filter articles for ids and titles, search for Rust in title, make comma seperated list
+* `rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id, url: .given_url } | select((.title | test("Rust")) or (.url | test("Rust")))'`
 
-`rat pocket list | jq -r '.list | .[] | { title: .given_title, id: .item_id } | select(.title | test("Rust")) | .id' | paste -s -d , -`
+##### Filter ids, search for Rust in title and URL, make comma seperated list
+
+`rat pocket search Rust | jq -r '.list | .[] | .item_id' | paste -s -d , -`
 
 ----
 
 ## Clients to Come
 
 ```
-rat pocket rm --ids <id>,<id>
+rat pocket archive|delete --ids <id>,<id>
 
 rat centerdevice auth
 rat centerdevice upload <file>
@@ -82,9 +91,22 @@ rat bosun emit <metric datum>
 
     * [ ] packagecloud.io
 
-* [ ] Tests
-
     * [ ] Add Badges for Travis to Cargo.toml
+
+
+* [ ] Finish Pocket
+
+* [ ] Output
+
+    * [ ] General option
+
+    * [ ] colors: regular, info(blue), warnings(yellow), error(red)
+
+    * [ ] quiet option
+
+    * [ ] add info msgs to modules
+
+* [ ] Tests
 
 
 ----
