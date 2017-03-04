@@ -101,7 +101,7 @@ rat bosun emit <metric datum>
     * [ ] Add Badges for Travis to Cargo.toml
 
 
-* [ ] Finish Pocket
+* [x] Finish Pocket
 
 * [ ] Output
 
@@ -115,12 +115,18 @@ rat bosun emit <metric datum>
 
 * [ ] Tests
 
+* [ ] EnhancePocket
+
+    * [ ] Add --since and --until parameters for search
+
 
 ----
 
 ## References
 
 ### Pocket
+
+* [Pocket API](https://getpocket.com/developer/)
 
 * [Pocket Auth](http://www.jamesfmackenzie.com/getting-started-with-the-pocket-developer-api/)
 
