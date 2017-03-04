@@ -28,5 +28,6 @@ serde_derive = "0.9"
 serde_json = "0.9"
 serde_urlencoded = "0.4"
 toml = "0.3"
+term-painter = "0.2"
 webbrowser = "0.2"
 

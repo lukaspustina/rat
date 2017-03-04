@@ -1,11 +1,13 @@
 extern crate rat;
 extern crate clap;
 
-use clap::{Arg, ArgMatches, App, Shell};
 use rat::config::Config;
 use rat::errors::*;
 use rat::modules::centerdevice;
 use rat::modules::pocket;
+use rat::utils::console::*;
+
+use clap::{Arg, ArgMatches, App, Shell};
 use std::env;
 use std::io;
 use std::path::Path;
@@ -16,16 +18,16 @@ static VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
     if let Err(ref e) = run() {
-        println!("{} failed because {}", BIN_NAME, e);
+        error(format!("{} failed because {}", BIN_NAME, e));
 
         for e in e.iter().skip(1) {
-            println!("caused by: {}", e);
+            error(format!("caused by: {}", e));
         }
 
         // The backtrace is not always generated. Try to run this example
         // with `RUST_BACKTRACE=1`.
         if let Some(backtrace) = e.backtrace() {
-            println!("backtrace: {:?}", backtrace);
+            error(format!("backtrace: {:?}", backtrace));
         }
 
         ::std::process::exit(1);
@@ -47,7 +49,7 @@ fn run() -> Result<()> {
 
 
     if cli_args.is_present("show-config") {
-        println!("{:?}", config)
+        msg(format!("{:?}", config))
     }
 
     let subcommand = cli_args.subcommand_name().ok_or(ErrorKind::NoCommandSpecified)?;

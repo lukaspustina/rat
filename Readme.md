@@ -107,7 +107,7 @@ rat bosun emit <metric datum>
 
     * [ ] General option
 
-    * [ ] colors: regular, info(blue), warnings(yellow), error(red)
+    * [X] colors: regular, info(blue), warnings(yellow), error(red)
 
     * [ ] quiet option
 

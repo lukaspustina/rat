@@ -1,5 +1,6 @@
 use super::Config;
 use net::{curl, HttpVerb};
+use utils::console::*;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
@@ -127,7 +128,7 @@ fn send(config: &Config, actions: &[ActionRequest]) -> Result<()> {
     ).chain_err(|| "Curl failed")?;
 
     let response_str = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
-    println!("{}", response_str);
+    msg(format!("{}", response_str));
 
     Ok(())
 }

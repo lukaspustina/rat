@@ -7,6 +7,7 @@ extern crate curl;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 extern crate serde_urlencoded;
+extern crate term_painter;
 extern crate toml;
 extern crate webbrowser;
 
@@ -14,3 +15,4 @@ pub mod config;
 pub mod errors;
 pub mod modules;
 pub mod net;
+pub mod utils;

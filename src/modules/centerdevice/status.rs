@@ -1,6 +1,7 @@
 use super::Config;
 use config::OutputFormat;
 use net::{curl_json, HttpVerb};
+use utils::console::*;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
@@ -123,6 +124,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let details = args.ok_or(false).unwrap().is_present("details");
+    info(format!("Getting CenterDevice Status ..."));
     status(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
 }
 
@@ -147,21 +149,22 @@ fn output(json: &str, format: &OutputFormat, details: bool) -> Result<()> {
         OutputFormat::HUMAN => {
             let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
             match (&status.Status, details) {
-                (&Status::Okay, false) => println!("CenterDevice status is {:?}.", status.Status),
+                (&Status::Okay, false) =>
+                    msg(format!("CenterDevice status is {:?}.", status.Status)),
                 (&Status::Okay, true) | (&Status::Warning, _) | (&Status::Failed, _) => {
-                    println!("CenterDevice status is {:?}.", status.Status);
-                    println!("+ Rest: {:?}", status.Rest.Status);
-                    println!("+ Auth: {:?}", status.Auth.Status);
-                    println!("+ WebClient: {:?}", status.WebClient.Status);
-                    println!("+ PublicLink: {:?}", status.PublicLink.Status);
-                    println!("+ DistributorConsole: {:?}", status.DistributorConsole.Status);
-                    println!("+ PingDom: {:?}", status.PingDom.Status);
+                    msg(format!("CenterDevice status is {:?}.", status.Status));
+                    msg(format!("+ Rest: {:?}", status.Rest.Status));
+                    msg(format!("+ Auth: {:?}", status.Auth.Status));
+                    msg(format!("+ WebClient: {:?}", status.WebClient.Status));
+                    msg(format!("+ PublicLink: {:?}", status.PublicLink.Status));
+                    msg(format!("+ DistributorConsole: {:?}", status.DistributorConsole.Status));
+                    msg(format!("+ PingDom: {:?}", status.PingDom.Status));
                 }
             }
             Ok(())
         }
         OutputFormat::JSON => {
-            println!("{}", json);
+            msg(format!("{}", json));
             Ok(())
         }
     }
