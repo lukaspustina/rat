@@ -2,10 +2,11 @@
 
 ## Available Clients
 
-```
+```bash
 rat pocket auth
 rat pocket list [--details] --tags <tag>,<tag> [--state unread|archive|all] [--sort newest|oldest|title|site ]
 rat pocket search [--details] --tags <tag>,<tag> [--state unread|archive|all] [--sort newest|oldest|title|site ] <in title or url>
+rat pocket archive|readd|favorite|unfavorite|delete <id>...
 
 rat centerdevice status [--details]
 rat centerdevice browse-status [--details]
@@ -26,9 +27,17 @@ brew install lukaspustina/os/rat
 
 #### Authentication
 
-consumer_key
+##### Create a consumer key
 
-auth_key
+Create a [new application](https://getpocket.com/developer/apps/new) and add the newly created consumer key to your rat configuration, section [pocket] as `consumer_key = '<consumer key'`.
+
+##### Authenticate rat
+
+`rat pocket auth` and follow the instructions.
+
+#### Archive| Readd| Favorite| Unfavorite | Delete
+
+`rat pocket archive|readd|favorite|unfavorite|delete <article ids>...`
 
 #### List
 
@@ -51,8 +60,6 @@ auth_key
 ## Clients to Come
 
 ```
-rat pocket archive|delete --ids <id>,<id>
-
 rat centerdevice auth
 rat centerdevice upload <file>
 rat centerdevice search <search>

@@ -1,9 +1,11 @@
 use errors::*;
 
 use clap::{App, ArgMatches, SubCommand};
+use itertools::Itertools;
 
 pub const NAME: &'static str = "pocket";
 
+mod actions;
 mod auth;
 mod list;
 mod search;
@@ -15,11 +17,15 @@ pub struct Config {
 }
 
 pub fn build_sub_cli() -> App<'static, 'static> {
-    SubCommand::with_name(NAME)
+    let mut subcommand = SubCommand::with_name(NAME)
         .about("Pocket: When you find something you want to view later, put it in Pocket.")
         .subcommand(auth::build_sub_cli())
         .subcommand(list::build_sub_cli())
-        .subcommand(search::build_sub_cli())
+        .subcommand(search::build_sub_cli());
+    for s in actions::build_sub_cli() {
+        subcommand = subcommand.subcommand(s);
+    }
+    subcommand
 }
 
 pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
@@ -31,6 +37,10 @@ pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         list::NAME => list::call(subcommand.subcommand_matches(subcommand_name), &config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         search::NAME => search::call(subcommand.subcommand_matches(subcommand_name), &config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        actions::NAME_ARCHIVE | actions::NAME_READD | actions::NAME_FAVORITE
+        | actions::NAME_UNFAVORITE | actions::NAME_DELETE =>
+            actions::call(subcommand_name, subcommand.subcommand_matches(subcommand_name), &config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         _ => Ok(())
     }
