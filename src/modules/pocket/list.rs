@@ -140,6 +140,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         search: search,
     };
 
+    info(format!("Getting list of your articles ..."));
     get(config, &request).chain_err(|| ErrorKind::PocketListFailed)
 }
 

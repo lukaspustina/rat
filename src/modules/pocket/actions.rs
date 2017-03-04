@@ -101,6 +101,7 @@ pub fn call(action: &str, args: Option<&ArgMatches>, config: &Config) -> Result<
     let ids = args.values_of("id").unwrap();
     let actions: Vec<ActionRequest> = ids.map(|id| ActionRequest::new(&action, id)).collect();
 
+    info(format!("Sending {} action for {} article(s) ...", action, actions.len()));
     send(config, &actions)
         .chain_err(|| ErrorKind::PocketActionFailed(action.to_string()))
 }

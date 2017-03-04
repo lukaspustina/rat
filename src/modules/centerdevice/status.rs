@@ -130,7 +130,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
 fn status(config: &Config, details: bool) -> Result<()> {
     let json = get_centerdevice_status_json()?;
-    output(&json, &config.output_format, details)
+    output(&json, &OutputFormat::HUMAN, details)
 }
 
 fn get_centerdevice_status_json() -> Result<String> {

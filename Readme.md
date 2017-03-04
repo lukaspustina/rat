@@ -94,24 +94,27 @@ rat bosun emit <metric datum>
 
     * [X] Debian
 
+* [X] Finish Pocket
+
+* [ ] Output
+
+    * [X] General option
+
+    * [X] colors: regular, info(blue), warnings(yellow), error(red)
+
+    * [X] add info msgs to modules
+
+    * [ ] quiet option
+
+    * [ ] Apply output format to all, well, output
+
 * [ ] Travis
 
     * [ ] packagecloud.io
 
     * [ ] Add Badges for Travis to Cargo.toml
 
-
-* [x] Finish Pocket
-
-* [ ] Output
-
-    * [ ] General option
-
-    * [X] colors: regular, info(blue), warnings(yellow), error(red)
-
-    * [ ] quiet option
-
-    * [ ] add info msgs to modules
+* [ ] Move Strings to real ErrorKinds for Curl
 
 * [ ] Tests
 

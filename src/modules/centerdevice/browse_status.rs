@@ -1,7 +1,8 @@
 use super::Config;
-use webbrowser;
+use utils::console::*;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use webbrowser;
 
 pub const NAME: &'static str = "browse-status";
 
@@ -24,6 +25,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 }
 
 pub fn call(args: Option<&ArgMatches>, _: &Config) -> Result<()> {
+    info(format!("Opening CenterDevice Status website ..."));
     let is_details = args.ok_or(false).unwrap().is_present("details");
     let result = match is_details {
         true  => webbrowser::open("http://status.centerdevice.de/details.html"),

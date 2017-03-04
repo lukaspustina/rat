@@ -1,4 +1,4 @@
-use config::OutputFormat;
+use config::GeneralConfig;
 use errors::*;
 
 use clap::{App, ArgMatches, SubCommand};
@@ -10,7 +10,6 @@ mod status;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub output_format: OutputFormat,
 }
 
 pub fn build_sub_cli() -> App<'static, 'static> {

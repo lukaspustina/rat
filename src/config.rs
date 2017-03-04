@@ -14,7 +14,22 @@ pub enum OutputFormat {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(tag = "verbosity")]
+pub enum Verbosity {
+    VERBOSE,
+    NORMAL,
+    QUIET,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GeneralConfig {
+    output_format: OutputFormat,
+    verbosity: Verbosity,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Config {
+    pub general: GeneralConfig,
     pub centerdevice: centerdevice::Config,
     pub pocket: pocket::Config,
 }

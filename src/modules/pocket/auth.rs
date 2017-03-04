@@ -58,6 +58,7 @@ fn auth(config: &Config) -> Result<()> {
     let consumer_key = &config.consumer_key;
 
     // Step 1 -- get code
+    info("Requesting authentication code ...");
     let mut buffer = Vec::new();
     let step_1 = Step1 { consumer_key: consumer_key, redirect_uri: REDIRECT_URI};
     // TODO: Only continue if 200
@@ -72,6 +73,7 @@ fn auth(config: &Config) -> Result<()> {
     let step_1_result: Step1Result = serde_json::from_slice(&buffer).chain_err(|| "JSON parsing failed")?;
 
     // Step 2 -- Wait for Web UI authentication
+    info("Authorizing code via Pocket ...");
     msg(format!("Please authenticate at the following URL and then press return ..."));
     msg(format!("\n\thttps://getpocket.com/auth/authorize?request_token={}&redirect_uri={}\n",
              step_1_result.code, REDIRECT_URI));
@@ -79,6 +81,7 @@ fn auth(config: &Config) -> Result<()> {
     let _ = io::stdin().read_line(&mut input);
 
     // Step 3 -- Exchange code for access token
+    info("Requesting access token ...");
     let mut buffer = Vec::new();
     let step_3 = Step3 { consumer_key: consumer_key, code: &step_1_result.code };
     let step_3_json = serde_json::to_string(&step_3).chain_err(|| "JSON serialization failed")?.into_bytes();
