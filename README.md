@@ -108,7 +108,13 @@ rat bosun emit <metric datum>
 
     * [X] Add output format parameter
 
-    * [ ] Apply output format to all, well, outputs
+    * [+] Apply output format to all, well, outputs
+
+* [ ] Move Strings to real ErrorKinds for Curl
+
+* [ ] EnhancePocket
+
+    * [ ] Add --since and --until parameters for search
 
 * [ ] Travis
 
@@ -116,13 +122,7 @@ rat bosun emit <metric datum>
 
     * [ ] Add Badges for Travis to Cargo.toml
 
-* [ ] Move Strings to real ErrorKinds for Curl
-
 * [ ] Tests
-
-* [ ] EnhancePocket
-
-    * [ ] Add --since and --until parameters for search
 
 
 ----
