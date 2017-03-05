@@ -106,6 +106,8 @@ rat bosun emit <metric datum>
 
     * [x] quiet option
 
+    * [X] Add output format parameter
+
     * [ ] Apply output format to all, well, outputs
 
 * [ ] Travis

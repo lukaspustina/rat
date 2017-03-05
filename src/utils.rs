@@ -37,3 +37,21 @@ pub mod console {
         my_verbosity >= verbosity
     }
 }
+
+pub mod output {
+    use super::console::msg;
+
+    error_chain! {
+        errors {
+           OutputFailed {
+                description("Failed to print message")
+                display("Failed to print message")
+            }
+        }
+    }
+
+    pub fn as_json(json: &str) -> Result<()> {
+        msg(format!("{}", json));
+        Ok(())
+    }
+}

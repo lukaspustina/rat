@@ -1,6 +1,7 @@
 use config::{Config, OutputFormat};
 use net::{curl_json, HttpVerb};
 use utils::console::*;
+use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
@@ -142,30 +143,29 @@ fn get_centerdevice_status_json() -> Result<String> {
     Ok(json.to_string())
 }
 
-
 fn output(json: &str, format: &OutputFormat, details: bool) -> Result<()> {
     match *format {
-        OutputFormat::HUMAN => {
-            let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
-            match (&status.Status, details) {
-                (&Status::Okay, false) =>
-                    msg(format!("CenterDevice status is {:?}.", status.Status)),
-                (&Status::Okay, true) | (&Status::Warning, _) | (&Status::Failed, _) => {
-                    msg(format!("CenterDevice status is {:?}.", status.Status));
-                    msg(format!("+ Rest: {:?}", status.Rest.Status));
-                    msg(format!("+ Auth: {:?}", status.Auth.Status));
-                    msg(format!("+ WebClient: {:?}", status.WebClient.Status));
-                    msg(format!("+ PublicLink: {:?}", status.PublicLink.Status));
-                    msg(format!("+ DistributorConsole: {:?}", status.DistributorConsole.Status));
-                    msg(format!("+ PingDom: {:?}", status.PingDom.Status));
-                }
-            }
-            Ok(())
-        }
-        OutputFormat::JSON => {
-            msg(format!("{}", json));
-            Ok(())
+        OutputFormat::HUMAN => output_human(json, details),
+        OutputFormat::JSON  => output::as_json(json)
+            .chain_err(|| ErrorKind::CenterDeviceStatusFailed),
+    }
+}
+
+fn output_human(json: &str, details: bool) -> Result<()> {
+    let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+    match (&status.Status, details) {
+        (&Status::Okay, false) =>
+            msg(format!("CenterDevice status is {:?}.", status.Status)),
+        (&Status::Okay, true) | (&Status::Warning, _) | (&Status::Failed, _) => {
+            msg(format!("CenterDevice status is {:?}.", status.Status));
+            msg(format!("+ Rest: {:?}", status.Rest.Status));
+            msg(format!("+ Auth: {:?}", status.Auth.Status));
+            msg(format!("+ WebClient: {:?}", status.WebClient.Status));
+            msg(format!("+ PublicLink: {:?}", status.PublicLink.Status));
+            msg(format!("+ DistributorConsole: {:?}", status.DistributorConsole.Status));
+            msg(format!("+ PingDom: {:?}", status.PingDom.Status));
         }
     }
+    Ok(())
 }
 

@@ -54,6 +54,10 @@ fn run() -> Result<()> {
     }
     console::init(config.general.verbosity);
 
+    if let Some(output_format) = cli_args.value_of("output-format") {
+        config.general.output_format = output_format.into();
+    }
+
     if cli_args.is_present("show-config") {
         console::msg(format!("{:?}", &config))
     }
@@ -85,6 +89,12 @@ fn build_cli() -> App<'static, 'static> {
             .long("verbose")
             .conflicts_with("quiet")
             .help("Set verbose mode"))
+        .arg(Arg::with_name("output-format")
+            .short("o")
+            .long("output")
+            .takes_value(true)
+            .possible_values(&["human", "json"])
+            .help("Sets output format"))
         .arg(Arg::with_name("completions")
             .long("completions")
             .takes_value(true)

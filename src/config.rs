@@ -13,6 +13,16 @@ pub enum OutputFormat {
     HUMAN,
 }
 
+impl<'a> From<&'a str> for OutputFormat {
+    fn from(format: &'a str) -> Self {
+        let format_sane: &str = &format.to_string().to_uppercase();
+        match format_sane {
+            "JSON" => OutputFormat::JSON,
+            _ => OutputFormat::HUMAN
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(tag = "verbosity")]
 #[derive(PartialOrd, PartialEq, Eq)]
