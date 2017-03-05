@@ -104,9 +104,9 @@ rat bosun emit <metric datum>
 
     * [X] add info msgs to modules
 
-    * [ ] quiet option
+    * [x] quiet option
 
-    * [ ] Apply output format to all, well, output
+    * [ ] Apply output format to all, well, outputs
 
 * [ ] Travis
 

@@ -15,10 +15,12 @@ pub enum OutputFormat {
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "verbosity")]
+#[derive(PartialOrd, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 pub enum Verbosity {
-    VERBOSE,
-    NORMAL,
-    QUIET,
+    VERBOSE = 1,
+    NORMAL = 2,
+    QUIET = 3,
 }
 
 #[derive(Debug, Deserialize)]

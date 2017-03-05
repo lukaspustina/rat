@@ -1,11 +1,11 @@
 extern crate rat;
 extern crate clap;
 
-use rat::config::Config;
+use rat::config::*;
 use rat::errors::*;
 use rat::modules::centerdevice;
 use rat::modules::pocket;
-use rat::utils::console::*;
+use rat::utils::*;
 
 use clap::{Arg, ArgMatches, App, Shell};
 use std::env;
@@ -18,16 +18,16 @@ static VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
     if let Err(ref e) = run() {
-        error(format!("{} failed because {}", BIN_NAME, e));
+        console::error(format!("{} failed because {}", BIN_NAME, e));
 
         for e in e.iter().skip(1) {
-            error(format!("caused by: {}", e));
+            console::error(format!("caused by: {}", e));
         }
 
         // The backtrace is not always generated. Try to run this example
         // with `RUST_BACKTRACE=1`.
         if let Some(backtrace) = e.backtrace() {
-            error(format!("backtrace: {:?}", backtrace));
+            console::error(format!("backtrace: {:?}", backtrace));
         }
 
         ::std::process::exit(1);
@@ -45,11 +45,17 @@ fn run() -> Result<()> {
 
     let default_config_path = format!("{}/.{}", env::home_dir().unwrap().display(), DEFAULT_CONFIG_FILE);
     let config_path = Path::new(cli_args.value_of("configfile").unwrap_or(&default_config_path));
-    let config = Config::from_file(config_path)?;
+    let mut config = Config::from_file(config_path)?;
 
+    if cli_args.is_present("quiet") {
+        config.general.verbosity = Verbosity::QUIET;
+    } else if cli_args.is_present("verbose") {
+        config.general.verbosity = Verbosity::VERBOSE;
+    }
+    console::init(config.general.verbosity);
 
     if cli_args.is_present("show-config") {
-        msg(format!("{:?}", config))
+        console::msg(format!("{:?}", &config))
     }
 
     let subcommand = cli_args.subcommand_name().ok_or(ErrorKind::NoCommandSpecified)?;
@@ -69,6 +75,16 @@ fn build_cli() -> App<'static, 'static> {
         .arg(Arg::with_name("show-config")
             .long("show-config")
             .help("Prints config"))
+        .arg(Arg::with_name("quiet")
+            .short("q")
+            .long("quiet")
+            .conflicts_with("verbose")
+            .help("Sets quiet mode"))
+        .arg(Arg::with_name("verbose")
+            .short("v")
+            .long("verbose")
+            .conflicts_with("quiet")
+            .help("Set verbose mode"))
         .arg(Arg::with_name("completions")
             .long("completions")
             .takes_value(true)
