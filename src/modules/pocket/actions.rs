@@ -1,8 +1,10 @@
-use config::Config;
+use config::{Config, OutputFormat};
 use net::{curl, HttpVerb};
 use utils::console::*;
+use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use itertools;
 use serde_json;
 use serde_urlencoded;
 use std::str;
@@ -18,7 +20,11 @@ error_chain! {
        PocketActionFailed(action: String) {
             description("action failed to apply to Pocket articles")
             display("action '{}' failed to apply to Pocket article", action)
-        }
+       }
+       OutputFailed {
+            description("output failed")
+            display("output failed")
+       }
     }
 }
 
@@ -103,12 +109,13 @@ pub fn call(action: &str, args: Option<&ArgMatches>, config: &Config) -> Result<
     let actions: Vec<ActionRequest> = ids.map(|id| ActionRequest::new(&action, id)).collect();
 
     info(format!("Sending {} action for {} article(s) ...", action, actions.len()));
-    send(config, &actions)
-        .chain_err(|| ErrorKind::PocketActionFailed(action.to_string()))
+    let json = send(config, &actions).chain_err(|| ErrorKind::PocketActionFailed(action.to_string()))?;
+
+    output(&json, &config.general.output_format)
 }
 
 #[allow(unused_variables)] // for status codes
-fn send(config: &Config, actions: &[ActionRequest]) -> Result<()> {
+fn send(config: &Config, actions: &[ActionRequest]) -> Result<String> {
     let mut buffer = Vec::new();
     let actions_json = serde_json::to_string(&actions).chain_err(|| "JSON serialization failed")?;
     let parameters = &[
@@ -130,7 +137,33 @@ fn send(config: &Config, actions: &[ActionRequest]) -> Result<()> {
     ).chain_err(|| "Curl failed")?;
 
     let response_str = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
-    msg(format!("{}", response_str));
+
+    Ok(response_str.to_string())
+}
+
+fn output(json: &str, format: &OutputFormat) -> Result<()> {
+    match *format {
+        OutputFormat::HUMAN => output_human(json),
+        OutputFormat::JSON  => output::as_json(json).chain_err(|| ErrorKind::OutputFailed),
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct ActionResults {
+    action_results: Vec<bool>,
+    status: i32,
+}
+
+fn output_human(json: &str) -> Result<()> {
+    let result: ActionResults = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+
+    if result.status == 1 {
+        msg(format!("Received {} results.", result.action_results.len()));
+    } else {
+        msg("Action failed.");
+    }
+    let successful: usize = result.action_results.iter().filter(|b| **b).collect::<Vec<_>>().len();
+    msg(format!("{} action(s) successful, {} failed.", successful, result.action_results.len() - successful));
 
     Ok(())
 }

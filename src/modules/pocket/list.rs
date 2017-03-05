@@ -1,9 +1,11 @@
-use config::Config;
+use config::{Config, OutputFormat};
 use net::{curl, HttpVerb};
 use utils::console::*;
+use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
+use std::collections::HashMap;
 use std::str;
 
 pub const NAME: &'static str = "list";
@@ -141,11 +143,13 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     };
 
     info(format!("Getting list of your articles ..."));
-    get(config, &request).chain_err(|| ErrorKind::PocketListFailed)
+    let json = get(config, &request).chain_err(|| ErrorKind::PocketListFailed)?;
+
+    output(&json, &config.general.output_format)
 }
 
 #[allow(unused_variables)] // for status codes
-fn get(config: &Config, request: &Request) -> Result<()> {
+fn get(config: &Config, request: &Request) -> Result<String> {
     let mut buffer = Vec::new();
     let request_json = &serde_json::to_string(&request).chain_err(|| "JSON serialization failed")?.into_bytes();
     // TODO: Only continue if 200
@@ -156,9 +160,44 @@ fn get(config: &Config, request: &Request) -> Result<()> {
         Some(request_json),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;
-
     let response_str = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
-    msg(format!("{}", response_str));
+
+    Ok(response_str.to_string())
+}
+
+fn output(json: &str, format: &OutputFormat) -> Result<()> {
+    match *format {
+        OutputFormat::HUMAN => output_human(json),
+        OutputFormat::JSON  => output::as_json(json)
+            .chain_err(|| ErrorKind::PocketListFailed),
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct ListResult {
+    status: i32,
+    complete: i32,
+    list: HashMap<String, Article>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Article {
+    item_id: String,
+    resolved_title: String,
+    resolved_url: String,
+}
+
+fn output_human(json: &str) -> Result<()> {
+    let list: ListResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+
+    if list.status == 1 {
+        msg(format!("Received {} articles.", list.list.values().len()));
+    } else {
+        msg("Receiving articles failed.");
+    }
+    for a in list.list.values() {
+        msg(format!("{}: '{}', {}", a.item_id, a.resolved_title, a.resolved_url));
+    }
 
     Ok(())
 }

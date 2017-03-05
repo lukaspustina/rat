@@ -43,17 +43,17 @@ Create a [new application](https://getpocket.com/developer/apps/new) and add the
 
 ##### Filter articles for ids and titles
 
-`rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id }'`
+`rat -o json pocket list | jq '.list | .[] | { title: .given_title, id: .item_id }'`
 
 ##### Filter articles for ids and titles and search for Rust in title and URL
 
-* `rat pocket search Rust | jq -r '.list | .[] | { title: .given_title, id: .item_id }'`
+* `rat -o json pocket search Rust | jq -r '.list | .[] | { title: .given_title, id: .item_id }'`
 
-* `rat pocket list | jq '.list | .[] | { title: .given_title, id: .item_id, url: .given_url } | select((.title | test("Rust")) or (.url | test("Rust")))'`
+* `rat -o json pocket list | jq '.list | .[] | { title: .given_title, id: .item_id, url: .given_url } | select((.title | test("Rust")) or (.url | test("Rust")))'`
 
 ##### Filter ids, search for Rust in title and URL, make comma seperated list
 
-`rat pocket search Rust | jq -r '.list | .[] | .item_id' | paste -s -d , -`
+`rat -o json pocket search Rust | jq -r '.list | .[] | .item_id' | paste -s -d , -`
 
 ----
 
@@ -96,7 +96,7 @@ rat bosun emit <metric datum>
 
 * [X] Finish Pocket
 
-* [ ] Output
+* [X] Output
 
     * [X] General option
 
@@ -108,13 +108,17 @@ rat bosun emit <metric datum>
 
     * [X] Add output format parameter
 
-    * [+] Apply output format to all, well, outputs
+    * [X] Apply output format to all, well, outputs
 
-* [ ] Move Strings to real ErrorKinds for Curl
+* [ ] Move Strings to real ErrorKinds for Curl, etc.
 
-* [ ] EnhancePocket
+* [ ] Enhance Pocket
 
     * [ ] Add --since and --until parameters for search
+
+    * [ ] Select human outout fields: id, title, url
+
+    * [ ] Update documentation
 
 * [ ] Travis
 

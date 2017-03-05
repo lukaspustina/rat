@@ -1,4 +1,4 @@
-use config::Config;
+use config::{Config, OutputFormat};
 use net::{curl, HttpVerb};
 use utils::console::*;
 
@@ -61,15 +61,20 @@ fn auth(config: &Config) -> Result<()> {
     info("Requesting authentication code ...");
     let mut buffer = Vec::new();
     let step_1 = Step1 { consumer_key: consumer_key, redirect_uri: REDIRECT_URI};
+    let step_1_json = serde_json::to_string(&step_1).chain_err(|| "JSON serialization failed")?;
+
     // TODO: Only continue if 200
-    let step_1_json = serde_json::to_string(&step_1).chain_err(|| "JSON serialization failed")?.into_bytes();
     let step_1_status_code = curl(
         "https://getpocket.com/v3/oauth/request",
         HttpVerb::POST,
         Some(&HEADERS),
-        Some(&step_1_json),
+        Some(&step_1_json.into_bytes()),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;
+    if config.general.output_format == OutputFormat::JSON {
+        info("Received response:");
+        msg(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
+    }
     let step_1_result: Step1Result = serde_json::from_slice(&buffer).chain_err(|| "JSON parsing failed")?;
 
     // Step 2 -- Wait for Web UI authentication
@@ -93,6 +98,10 @@ fn auth(config: &Config) -> Result<()> {
         Some(&step_3_json),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;
+    if config.general.output_format == OutputFormat::JSON {
+        info("Received response:");
+        msg(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
+    }
     let step_3_result: Step3Result = serde_json::from_slice(&buffer).chain_err(|| "JSON parsing failed")?;
 
     msg(format!("Received access token for user '{}'. Please add the following line to your configuration, section '[pocket]'."

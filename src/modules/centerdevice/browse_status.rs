@@ -1,4 +1,4 @@
-use config::Config;
+use config::{Config, OutputFormat};
 use utils::console::*;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
@@ -24,13 +24,16 @@ pub fn build_sub_cli() -> App<'static, 'static> {
             .help("Show details page"))
 }
 
-pub fn call(args: Option<&ArgMatches>, _: &Config) -> Result<()> {
+pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     info(format!("Opening CenterDevice Status website ..."));
     let is_details = args.ok_or(false).unwrap().is_present("details");
-    let result = match is_details {
+    match is_details {
         true  => webbrowser::open("http://status.centerdevice.de/details.html"),
         false => webbrowser::open("http://status.centerdevice.de")
-    };
-    result.map( |_| Ok(()) ).chain_err(|| ErrorKind::CenterDeviceBrowseStatusFailed)?
+    }.chain_err(|| ErrorKind::CenterDeviceBrowseStatusFailed)?;
+
+    if config.general.output_format == OutputFormat::JSON { msg("{}"); }
+
+    Ok(())
 }
 

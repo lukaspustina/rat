@@ -8,6 +8,7 @@ use toml;
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "format")]
+#[derive(PartialOrd, PartialEq, Eq)]
 pub enum OutputFormat {
     JSON,
     HUMAN,
