@@ -1,8 +1,6 @@
-
 pub mod console {
     use term_painter::ToStyle;
     use term_painter::Color::*;
-    use term_painter::Attr::*;
 
     pub fn info<T: Into<String>>(msg: T) {
         println!("{}", Blue.paint(msg.into()))
@@ -21,4 +19,3 @@ pub mod console {
     }
 
 }
-

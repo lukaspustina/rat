@@ -2,7 +2,6 @@ use config::Config;
 use errors::*;
 
 use clap::{App, ArgMatches, SubCommand};
-use itertools::Itertools;
 
 pub const NAME: &'static str = "pocket";
 

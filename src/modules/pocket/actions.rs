@@ -24,6 +24,7 @@ error_chain! {
 
 #[allow(non_camel_case_types)]
 #[derive(Serialize, Debug)]
+// TODO: This enum is never used, everything is string based. Why?
 enum Action {
     archive,
     readd,
