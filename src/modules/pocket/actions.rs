@@ -1,4 +1,4 @@
-use super::Config;
+use config::Config;
 use net::{curl, HttpVerb};
 use utils::console::*;
 
@@ -112,8 +112,8 @@ fn send(config: &Config, actions: &[ActionRequest]) -> Result<()> {
     let actions_json = serde_json::to_string(&actions).chain_err(|| "JSON serialization failed")?;
     let parameters = &[
         ("actions", actions_json),
-        ("access_token", config.access_token.as_ref().unwrap().to_string()),
-        ("consumer_key", config.consumer_key.to_string())
+        ("access_token", config.pocket.access_token.as_ref().unwrap().to_string()),
+        ("consumer_key", config.pocket.consumer_key.to_string())
     ];
     let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
 

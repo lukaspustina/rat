@@ -1,4 +1,4 @@
-use config::GeneralConfig;
+use config::Config;
 use errors::*;
 
 use clap::{App, ArgMatches, SubCommand};
@@ -9,7 +9,7 @@ mod browse_status;
 mod status;
 
 #[derive(Debug, Deserialize)]
-pub struct Config {
+pub struct CenterDeviceConfig {
 }
 
 pub fn build_sub_cli() -> App<'static, 'static> {

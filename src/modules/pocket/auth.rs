@@ -1,4 +1,4 @@
-use super::Config;
+use config::Config;
 use net::{curl, HttpVerb};
 use utils::console::*;
 
@@ -55,7 +55,7 @@ pub fn call(_: Option<&ArgMatches>, config: &Config) -> Result<()>  {
 
 #[allow(unused_variables)] // for status codes
 fn auth(config: &Config) -> Result<()> {
-    let consumer_key = &config.consumer_key;
+    let consumer_key = &config.pocket.consumer_key;
 
     // Step 1 -- get code
     info("Requesting authentication code ...");

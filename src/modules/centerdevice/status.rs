@@ -1,5 +1,4 @@
-use super::Config;
-use config::OutputFormat;
+use config::{Config, OutputFormat};
 use net::{curl_json, HttpVerb};
 use utils::console::*;
 
@@ -130,7 +129,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
 fn status(config: &Config, details: bool) -> Result<()> {
     let json = get_centerdevice_status_json()?;
-    output(&json, &OutputFormat::HUMAN, details)
+    output(&json, &config.general.output_format, details)
 }
 
 fn get_centerdevice_status_json() -> Result<String> {

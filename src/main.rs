@@ -85,8 +85,8 @@ fn build_cli() -> App<'static, 'static> {
 
 fn call_module(subcommand: &str, cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     match subcommand {
-        centerdevice::NAME => centerdevice::call(cli_args, &config.centerdevice),
-        pocket::NAME       => pocket::call(cli_args, &config.pocket),
+        centerdevice::NAME => centerdevice::call(cli_args, &config),
+        pocket::NAME       => pocket::call(cli_args, &config),
         _ => Ok(())
     }
 }

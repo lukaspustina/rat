@@ -1,4 +1,4 @@
-use super::Config;
+use config::Config;
 use utils::console::*;
 
 use clap::{App, Arg, ArgMatches, SubCommand};

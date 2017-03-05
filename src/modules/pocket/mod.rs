@@ -1,3 +1,4 @@
+use config::Config;
 use errors::*;
 
 use clap::{App, ArgMatches, SubCommand};
@@ -11,7 +12,7 @@ mod list;
 mod search;
 
 #[derive(Debug, Deserialize)]
-pub struct Config {
+pub struct PocketConfig {
     pub consumer_key: String,
     pub access_token: Option<String>,
 }

@@ -1,4 +1,4 @@
-use super::Config;
+use config::Config;
 use net::{curl, HttpVerb};
 use utils::console::*;
 
@@ -131,8 +131,8 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     };
 
     let request = Request {
-        consumer_key: &config.consumer_key,
-        access_token: &config.access_token.as_ref().unwrap(),
+        consumer_key: &config.pocket.consumer_key,
+        access_token: &config.pocket.access_token.as_ref().unwrap(),
         state: state,
         tag: value,
         sort: sort,
