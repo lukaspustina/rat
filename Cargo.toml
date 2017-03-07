@@ -19,6 +19,7 @@ name = "rat"
 path = "src/main.rs"
 
 [dependencies]
+base64 = "~0.4.0"
 clap = "2"
 curl = "0.4"
 error-chain = "0.10"

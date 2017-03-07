@@ -131,6 +131,10 @@ rat bosun silence set
 
 * [ ] CenterDevice Auth
 
+* [ ] Enchance Auths by --browser which opens a browser window.
+
+* [ ] Move centerdevice browse-status to status --browse
+
 * [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to rmove "Curl failed" string Errors.
 
 * [ ] Enhance Pocket
