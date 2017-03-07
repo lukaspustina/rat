@@ -157,12 +157,12 @@ fn output_human(json: &str) -> Result<()> {
     let result: ActionResults = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
 
     if result.status == 1 {
-        msg(format!("Received {} results.", result.action_results.len()));
+        msgln(format!("Received {} results.", result.action_results.len()));
     } else {
-        msg("Action failed.");
+        msgln("Action failed.");
     }
     let successful: usize = result.action_results.iter().filter(|b| **b).collect::<Vec<_>>().len();
-    msg(format!("{} action(s) successful, {} failed.", successful, result.action_results.len() - successful));
+    msgln(format!("{} action(s) successful, {} failed.", successful, result.action_results.len() - successful));
 
     Ok(())
 }

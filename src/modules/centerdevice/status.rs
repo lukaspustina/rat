@@ -156,15 +156,15 @@ fn output_human(json: &str, details: bool) -> Result<()> {
     let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
     match (&status.Status, details) {
         (&Status::Okay, false) =>
-            msg(format!("CenterDevice status is {:?}.", status.Status)),
+            msgln(format!("CenterDevice status is {:?}.", status.Status)),
         (&Status::Okay, true) | (&Status::Warning, _) | (&Status::Failed, _) => {
-            msg(format!("CenterDevice status is {:?}.", status.Status));
-            msg(format!("+ Rest: {:?}", status.Rest.Status));
-            msg(format!("+ Auth: {:?}", status.Auth.Status));
-            msg(format!("+ WebClient: {:?}", status.WebClient.Status));
-            msg(format!("+ PublicLink: {:?}", status.PublicLink.Status));
-            msg(format!("+ DistributorConsole: {:?}", status.DistributorConsole.Status));
-            msg(format!("+ PingDom: {:?}", status.PingDom.Status));
+            msgln(format!("CenterDevice status is {:?}.", status.Status));
+            msgln(format!("+ Rest: {:?}", status.Rest.Status));
+            msgln(format!("+ Auth: {:?}", status.Auth.Status));
+            msgln(format!("+ WebClient: {:?}", status.WebClient.Status));
+            msgln(format!("+ PublicLink: {:?}", status.PublicLink.Status));
+            msgln(format!("+ DistributorConsole: {:?}", status.DistributorConsole.Status));
+            msgln(format!("+ PingDom: {:?}", status.PingDom.Status));
         }
     }
     Ok(())

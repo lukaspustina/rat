@@ -3,6 +3,8 @@ pub mod console {
 
     use term_painter::ToStyle;
     use term_painter::Color::*;
+    use std;
+    use std::io::Write;
     use std::sync::{Once, ONCE_INIT};
 
     static mut VERBOSITY: Option<Verbosity> = None;
@@ -20,8 +22,13 @@ pub mod console {
         if is_relevant(Verbosity::NORMAL) { println!("{}", Blue.paint(msg.into())) }
     }
 
-    pub fn msg<T: Into<String>>(msg: T) {
+    pub fn msgln<T: Into<String>>(msg: T) {
         println!("{}", msg.into())
+    }
+
+    pub fn msg<T: Into<String>>(msg: T) {
+        print!("{}", msg.into());
+        let _ = std::io::stdout().flush();
     }
 
     pub fn error<T: Into<String>>(msg: T) {
@@ -39,7 +46,7 @@ pub mod console {
 }
 
 pub mod output {
-    use super::console::msg;
+    use super::console::msgln;
 
     error_chain! {
         errors {
@@ -51,7 +58,7 @@ pub mod output {
     }
 
     pub fn as_json(json: &str) -> Result<()> {
-        msg(format!("{}", json));
+        msgln(format!("{}", json));
         Ok(())
     }
 }

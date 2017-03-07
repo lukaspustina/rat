@@ -5,6 +5,7 @@ use rat::config::*;
 use rat::errors::*;
 use rat::modules::centerdevice;
 use rat::modules::pocket;
+use rat::modules::slack;
 use rat::utils::*;
 
 use clap::{Arg, ArgMatches, App, Shell};
@@ -59,7 +60,7 @@ fn run() -> Result<()> {
     }
 
     if cli_args.is_present("show-config") {
-        console::msg(format!("{:?}", &config))
+        console::msgln(format!("{:?}", &config))
     }
 
     let subcommand = cli_args.subcommand_name().ok_or(ErrorKind::NoCommandSpecified)?;
@@ -105,6 +106,7 @@ fn build_cli() -> App<'static, 'static> {
 
     app = app.subcommand(centerdevice::build_sub_cli());
     app = app.subcommand(pocket::build_sub_cli());
+    app = app.subcommand(slack::build_sub_cli());
 
     app
 }
@@ -113,6 +115,7 @@ fn call_module(subcommand: &str, cli_args: Option<&ArgMatches>, config: &Config)
     match subcommand {
         centerdevice::NAME => centerdevice::call(cli_args, &config),
         pocket::NAME       => pocket::call(cli_args, &config),
+        slack::NAME        => slack::call(cli_args, &config),
         _ => Ok(())
     }
 }

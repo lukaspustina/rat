@@ -73,15 +73,15 @@ fn auth(config: &Config) -> Result<()> {
     ).chain_err(|| "Curl failed")?;
     if config.general.output_format == OutputFormat::JSON {
         info("Received response:");
-        msg(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
+        msgln(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
     }
     let step_1_result: Step1Result = serde_json::from_slice(&buffer).chain_err(|| "JSON parsing failed")?;
 
     // Step 2 -- Wait for Web UI authentication
     info("Authorizing code via Pocket ...");
-    msg(format!("Please authenticate at the following URL and then press return ..."));
-    msg(format!("\n\thttps://getpocket.com/auth/authorize?request_token={}&redirect_uri={}\n",
-             step_1_result.code, REDIRECT_URI));
+    msgln(format!("Please authenticate at the following URL and then press return ..."));
+    msgln(format!("\n\thttps://getpocket.com/auth/authorize?request_token={}&redirect_uri={}\n",
+                  step_1_result.code, REDIRECT_URI));
     let mut input = String::new();
     let _ = io::stdin().read_line(&mut input);
 
@@ -100,13 +100,13 @@ fn auth(config: &Config) -> Result<()> {
     ).chain_err(|| "Curl failed")?;
     if config.general.output_format == OutputFormat::JSON {
         info("Received response:");
-        msg(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
+        msgln(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
     }
     let step_3_result: Step3Result = serde_json::from_slice(&buffer).chain_err(|| "JSON parsing failed")?;
 
-    msg(format!("Received access token for user '{}'. Please add the following line to your configuration, section '[pocket]'."
-             , step_3_result.username));
-    msg(format!("\naccess_token = '{}'\n", step_3_result.access_token));
+    msgln(format!("Received access token for user '{}'. Please add the following line to your configuration, section '[pocket]'."
+                  , step_3_result.username));
+    msgln(format!("\naccess_token = '{}'\n", step_3_result.access_token));
 
     Ok(())
 }

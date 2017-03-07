@@ -1,5 +1,5 @@
 use errors::*;
-use modules::{centerdevice, pocket};
+use modules::{centerdevice, pocket, slack};
 
 use std::fs::File;
 use std::io::Read;
@@ -45,6 +45,7 @@ pub struct Config {
     pub general: GeneralConfig,
     pub centerdevice: centerdevice::CenterDeviceConfig,
     pub pocket: pocket::PocketConfig,
+    pub slack: slack::SlackConfig,
 }
 
 impl Config {

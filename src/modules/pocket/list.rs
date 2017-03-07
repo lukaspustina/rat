@@ -191,12 +191,12 @@ fn output_human(json: &str) -> Result<()> {
     let list: ListResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
 
     if list.status == 1 {
-        msg(format!("Received {} articles.", list.list.values().len()));
+        msgln(format!("Received {} articles.", list.list.values().len()));
     } else {
-        msg("Receiving articles failed.");
+        msgln("Receiving articles failed.");
     }
     for a in list.list.values() {
-        msg(format!("{}: '{}', {}", a.item_id, a.resolved_title, a.resolved_url));
+        msgln(format!("{}: '{}', {}", a.item_id, a.resolved_title, a.resolved_url));
     }
 
     Ok(())

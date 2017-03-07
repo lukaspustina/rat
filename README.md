@@ -20,8 +20,8 @@ rat centerdevice browse-status [--details]
 brew install lukaspustina/os/rat
 ```
 
-## Usage
 
+## Usage
 
 ### Pocket
 
@@ -55,6 +55,19 @@ Create a [new application](https://getpocket.com/developer/apps/new) and add the
 
 `rat -o json pocket search Rust | jq -r '.list | .[] | .item_id' | paste -s -d , -`
 
+
+### Slack
+
+#### Authentication
+
+##### Create client ID and client Secret
+
+Create a [new application](https://api.slack.com/apps) and add the newly created `Client ID` and `Client Secret` to your rat configuration, section [slack] as `client_id = '<client id>'` and `client_secret = '<client secret'`, respectively.
+
+##### Authenticate rat
+
+`rat slack auth` and follow the instructions.
+
 ----
 
 ## Clients to Come
@@ -69,7 +82,9 @@ rat elasticsearch browse
 rat elasticsearch status -- curl -s http://es-m-05:9200/_cluster/health?level=shards
 rat elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
 
-rat slack send <channel> <message>
+rat slack channel list
+rat slack user list
+rat slack send <channel|user> <message>
 
 rat bosun browse
 rat bosun incidents show --open

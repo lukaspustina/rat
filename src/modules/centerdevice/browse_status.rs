@@ -32,7 +32,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         false => webbrowser::open("http://status.centerdevice.de")
     }.chain_err(|| ErrorKind::CenterDeviceBrowseStatusFailed)?;
 
-    if config.general.output_format == OutputFormat::JSON { msg("{}"); }
+    if config.general.output_format == OutputFormat::JSON { msgln("{}"); }
 
     Ok(())
 }
