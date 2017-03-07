@@ -4,7 +4,6 @@ use utils::console::*;
 use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
-use itertools;
 use serde_json;
 use serde_urlencoded;
 use std::str;

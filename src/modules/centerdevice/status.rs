@@ -137,7 +137,8 @@ fn get_centerdevice_status_json() -> Result<String> {
     let mut buffer = Vec::new();
     let url = "http://status.centerdevice.de/details.json";
 
-    curl_json(url, HttpVerb::GET, None, None, Some(&mut buffer)).chain_err(|| "Curl failed")?;
+    curl_json(url, HttpVerb::GET, None, None, Some(&mut buffer))
+        .chain_err(|| ErrorKind::CenterDeviceStatusFailed)?;
     let json = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
 
     Ok(json.to_string())

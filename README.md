@@ -72,9 +72,11 @@ rat elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
 rat slack send <channel> <message>
 
 rat bosun browse
-rat bosun show-incidents --open
-rat bosun close-incidents --ids  <id>,<id> --message "Just because ..."
-rat bosun emit <metric datum>
+rat bosun incidents show --open
+rat bosun incidents ack|close --ids  <id>,<id> --message "Just because ..."
+rat bosun show-silences
+rat bosun silence show
+rat bosun silence set
 ```
 
 
@@ -110,7 +112,11 @@ rat bosun emit <metric datum>
 
     * [X] Apply output format to all, well, outputs
 
-* [ ] Move Strings to real ErrorKinds for Curl, etc.
+* [ ] Slack Auth
+
+* [ ] CenterDevice Auth
+
+* [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to rmove "Curl failed" string Errors.
 
 * [ ] Enhance Pocket
 
