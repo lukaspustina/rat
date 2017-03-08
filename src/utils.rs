@@ -18,6 +18,10 @@ pub mod console {
         }
     }
 
+    pub fn verbose<T: Into<String>>(msg: T) {
+        if is_relevant(Verbosity::VERBOSE) { println!("{}", Cyan.paint(msg.into())) }
+    }
+
     pub fn info<T: Into<String>>(msg: T) {
         if is_relevant(Verbosity::NORMAL) { println!("{}", Blue.paint(msg.into())) }
     }

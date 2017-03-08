@@ -4,12 +4,14 @@
 
 ```bash
 rat pocket auth
-rat pocket list [--details] --tags <tag>,<tag> [--state unread|archive|all] [--sort newest|oldest|title|site ]
-rat pocket search [--details] --tags <tag>,<tag> [--state unread|archive|all] [--sort newest|oldest|title|site ] <in title or url>
+rat pocket list [--details] [--tag <tag>] [--state unread|archive|all] [--sort newest|oldest|title|site ]
+rat pocket search [--details] [--tag <tag>] [--state unread|archive|all] [--sort newest|oldest|title|site ] <in title or url>
 rat pocket archive|readd|favorite|unfavorite|delete <id>...
 
-rat centerdevice status [--details]
+rat centerdevice auth
 rat centerdevice browse-status [--details]
+rat centerdevice status [--details]
+rat centerdevice upload [--filename <filename>] [--mime-type <mime type>] [--tag <tag1> --tag <tag...>] <file>
 ```
 
 ## Installation
@@ -22,6 +24,16 @@ brew install lukaspustina/os/rat
 
 
 ## Usage
+
+### CenterDevice
+
+##### Authenticate rat
+
+`rat centerdevice auth` and follow the instructions.
+
+##### Upload document
+
+`rat centerdevice upload README.md -t documentation -t rat`
 
 ### Pocket
 
@@ -74,7 +86,6 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 
 ```
 rat centerdevice auth
-rat centerdevice upload <file>
 rat centerdevice search <search>
 rat centerdevice download <document-id>
 
@@ -127,15 +138,21 @@ rat bosun silence set
 
     * [X] Apply output format to all, well, outputs
 
-* [ ] Slack Auth
+* [X] Slack Auth
 
-* [ ] CenterDevice Auth
+* [X] CenterDevice Auth
+
+* [X] CenterDevice Upload
+
+    * [ ] Use streams
 
 * [ ] Enchance Auths by --browser which opens a browser window.
 
 * [ ] Move centerdevice browse-status to status --browse
 
-* [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to rmove "Curl failed" string Errors.
+* [ ] Replace curl by hyper
+
+* [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to remove "Curl failed" string Errors.
 
 * [ ] Enhance Pocket
 
