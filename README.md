@@ -144,11 +144,13 @@ rat bosun silence set
 
 * [X] CenterDevice Upload
 
-    * [ ] Use streams
+    * [X] Use streams
 
 * [ ] Enchance Auths by --browser which opens a browser window.
 
 * [ ] Move centerdevice browse-status to status --browse
+
+* [ ] Make better use of error_chain by using Foreign errors
 
 * [ ] Replace curl by hyper
 

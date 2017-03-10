@@ -5,8 +5,8 @@ mod upload {
 
     use crypto::digest::Digest;
     use crypto::sha2::Sha256;
-    use hyper::Client;
-    use hyper::client::Body;
+    use hyper::client::Request;
+    use hyper::method::Method;
     use hyper::header::{Headers, ContentDisposition, DispositionParam, DispositionType, ContentType,
                         Authorization, Bearer, Accept, qitem};
     use hyper::net::HttpsConnector;
@@ -15,7 +15,7 @@ mod upload {
     use mime_multipart::{Node, Part, FilePart, write_multipart};
     use serde_json;
     use std::fs;
-    use std::io::{Read, BufReader};
+    use std::io::Read;
     use std::path::Path;
     use std::str;
 
@@ -80,31 +80,27 @@ mod upload {
         filename: &str,
         mime: Mime,
         title: Option<&str>,
-        tags: Option<Vec<&str>>)
-        -> Result<String> {
+        tags: Option<Vec<&str>>) -> Result<String> {
 
         let doc_metadata_json_bytes = create_doc_metadata(file, filename, title, tags)?.into_bytes();
         let boundary = generate_boundary(&doc_metadata_json_bytes);
-        let mut stream = Vec::new();
-
+        let boundary_bytes = boundary.clone().into_bytes();
         let nodes = create_multipart_nodes(
             doc_metadata_json_bytes, filename.to_string(), file, mime).chain_err(|| "Failed to create form-data")?;
-        let boundary_bytes = boundary.clone().into_bytes();
-        write_multipart(&mut stream, &boundary_bytes, &nodes).chain_err(|| "Failed to send multipart form-data")?;
-
-        let mut reader = BufReader::new(&stream[..]);
 
         let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
         let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
-        let request = client.post("https://api.centerdevice.de/v2/documents")
-            .header(Authorization(Bearer { token: access_token.to_string() }))
-            .header(ContentType(mime!(Multipart/FormData; Boundary=(boundary))))
-            .header(Accept(vec![qitem(mime!(Application/Json; Charset=Utf8))]))
-            .body(Body::from(&mut reader));
+        let url = ::hyper::Url::parse("https://api.centerdevice.de/v2/documents").chain_err(|| "Failed to parse URL")?;
+        let mut client = Request::with_connector(Method::Post, url, &connector).chain_err(|| "Failed to create client")?;
+        client.headers_mut().set(Authorization(Bearer { token: access_token.to_string() }));
+        client.headers_mut().set(ContentType(mime!(Multipart/FormData; Boundary=(boundary))));
+        client.headers_mut().set(Accept(vec![qitem(mime!(Application/Json; Charset=Utf8))]));
 
-        let mut response = request.send().chain_err(|| "Failed to execute http request")?;
-        let mut body = vec![];
+        let mut request = client.start().chain_err(|| "Failed to start HTTP connection")?;
+        write_multipart(&mut request, &boundary_bytes, &nodes).chain_err(|| "Failed to send multipart form-data")?;
+        let mut response = request.send().chain_err(|| "Failed to finish http request")?;
+
+        let mut body = Vec::new();
         response.read_to_end(&mut body).chain_err(|| "Failed to read server response")?;
         let response_body = String::from_utf8_lossy(&body).to_string();
 
