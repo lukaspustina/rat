@@ -2,10 +2,11 @@ use config::{Config, OutputFormat};
 use net::{curl, HttpVerb};
 use utils::console::*;
 
-use clap::{App, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
 use std::io;
 use std::str;
+use webbrowser;
 
 pub const NAME: &'static str = "auth";
 
@@ -47,20 +48,24 @@ struct Step3Result {
 pub fn build_sub_cli() -> App<'static, 'static> {
     SubCommand::with_name(NAME)
         .about("Runs authentication process to generate access token")
+        .arg(Arg::with_name("browser")
+            .long("browser")
+            .help("Open authentication page in default web browser"))
 }
 
-pub fn call(_: Option<&ArgMatches>, config: &Config) -> Result<()>  {
-    auth(config).chain_err(|| ErrorKind::PocketAuthFailed)
+pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
+    let use_browser = args.ok_or(false).unwrap().is_present("browser");
+    auth(config, use_browser).chain_err(|| ErrorKind::PocketAuthFailed)
 }
 
 #[allow(unused_variables)] // for status codes
-fn auth(config: &Config) -> Result<()> {
+fn auth(config: &Config, use_browser: bool) -> Result<()> {
     let consumer_key = &config.pocket.consumer_key;
 
     // Step 1 -- get code
     info("Requesting authentication code ...");
     let mut buffer = Vec::new();
-    let step_1 = Step1 { consumer_key: consumer_key, redirect_uri: REDIRECT_URI};
+    let step_1 = Step1 { consumer_key: consumer_key, redirect_uri: REDIRECT_URI };
     let step_1_json = serde_json::to_string(&step_1).chain_err(|| "JSON serialization failed")?;
 
     // TODO: Only continue if 200
@@ -79,9 +84,15 @@ fn auth(config: &Config) -> Result<()> {
 
     // Step 2 -- Wait for Web UI authentication
     info("Authorizing code via Pocket ...");
-    msgln(format!("Please authenticate at the following URL and then press return ..."));
-    msgln(format!("\n\thttps://getpocket.com/auth/authorize?request_token={}&redirect_uri={}\n",
-                  step_1_result.code, REDIRECT_URI));
+    let auth_url = format!("https://getpocket.com/auth/authorize?request_token={}&redirect_uri={}",
+                           step_1_result.code, REDIRECT_URI);
+    if use_browser {
+        msg(format!("Please authenticate in the web browser window and then press return ..."));
+        webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
+    } else {
+        msgln(format!("Please authenticate at the following URL and then press return ..."));
+        msgln(format!("\n\t{}\n", auth_url));
+    }
     let mut input = String::new();
     let _ = io::stdin().read_line(&mut input);
 

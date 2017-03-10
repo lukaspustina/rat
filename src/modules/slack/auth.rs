@@ -2,11 +2,12 @@ use config::{Config, OutputFormat};
 use net::{curl, HttpVerb};
 use utils::console::*;
 
-use clap::{App, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
 use serde_urlencoded;
 use std::io;
 use std::str;
+use webbrowser;
 
 pub const NAME: &'static str = "auth";
 
@@ -34,14 +35,18 @@ struct Step2Result {
 pub fn build_sub_cli() -> App<'static, 'static> {
     SubCommand::with_name(NAME)
         .about("Runs authentication process to generate access token")
+        .arg(Arg::with_name("browser")
+            .long("browser")
+            .help("Open authentication page in default web browser"))
 }
 
-pub fn call(_: Option<&ArgMatches>, config: &Config) -> Result<()>  {
-    auth(config).chain_err(|| ErrorKind::SlackAuthFailed)
+pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()>  {
+    let use_browser = args.ok_or(false).unwrap().is_present("browser");
+    auth(config, use_browser).chain_err(|| ErrorKind::SlackAuthFailed)
 }
 
 #[allow(unused_variables)] // for status codes
-fn auth(config: &Config) -> Result<()> {
+fn auth(config: &Config, use_browser: bool) -> Result<()> {
     let client_id = &config.slack.client_id;
     let client_secret = &config.slack.client_secret;
 
@@ -54,9 +59,14 @@ fn auth(config: &Config) -> Result<()> {
     ];
     let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
 
-    let url = format!("https://slack.com/oauth/authorize?{}", parameters_enc);
-    msgln(format!("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ..."));
-    msgln(format!("\n\t{}\n", url));
+    let auth_url = format!("https://slack.com/oauth/authorize?{}", parameters_enc);
+    if use_browser {
+        msgln(format!("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ..."));
+        webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
+    } else {
+        msgln(format!("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ..."));
+        msgln(format!("\n\t{}\n", auth_url));
+    }
     msg("Authentication code: ");
     let mut input = String::new();
     let size = io::stdin().read_line(&mut input);

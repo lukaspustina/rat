@@ -25,6 +25,7 @@ brew install lukaspustina/os/rat
 
 ## Usage
 
+
 ### CenterDevice
 
 ##### Authenticate rat
@@ -34,6 +35,7 @@ brew install lukaspustina/os/rat
 ##### Upload document
 
 `rat centerdevice upload README.md -t documentation -t rat`
+
 
 ### Pocket
 
@@ -85,7 +87,6 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 ## Clients to Come
 
 ```
-rat centerdevice auth
 rat centerdevice search <search>
 rat centerdevice download <document-id>
 
@@ -148,7 +149,7 @@ rat bosun silence set
 
 * [X] Move centerdevice browse-status to status --browse
 
-* [ ] Enchance Auths by --browser which opens a browser window.
+* [X] Enchance Auths by --browser which opens a browser window.
 
 * [ ] Make better use of error_chain by using Foreign errors
 
