@@ -146,9 +146,9 @@ rat bosun silence set
 
     * [X] Use streams
 
-* [ ] Enchance Auths by --browser which opens a browser window.
+* [X] Move centerdevice browse-status to status --browse
 
-* [ ] Move centerdevice browse-status to status --browse
+* [ ] Enchance Auths by --browser which opens a browser window.
 
 * [ ] Make better use of error_chain by using Foreign errors
 

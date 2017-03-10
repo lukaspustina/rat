@@ -6,6 +6,7 @@ use utils::output;
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
 use std::str;
+use webbrowser;
 
 pub const NAME: &'static str = "status";
 
@@ -120,12 +121,33 @@ pub fn build_sub_cli() -> App<'static, 'static> {
         .arg(Arg::with_name("details")
             .long("details")
             .help("Show detailed output"))
+        .arg(Arg::with_name("browser")
+            .long("browser")
+            .help("Open status in web browser"))
 }
 
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let details = args.ok_or(false).unwrap().is_present("details");
-    info(format!("Getting CenterDevice Status ..."));
-    status(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
+    let browser = args.ok_or(false).unwrap().is_present("browser");
+
+    if browser {
+        info(format!("Opening CenterDevice Status in default browser ..."));
+        browse(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
+    } else {
+        info(format!("Getting CenterDevice Status ..."));
+        status(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
+    }
+}
+
+fn browse(config: &Config, details: bool) -> Result<()> {
+    match details {
+        true  => webbrowser::open("http://status.centerdevice.de/details.html"),
+        false => webbrowser::open("http://status.centerdevice.de")
+    }.chain_err(|| "Failed to open default browser")?;
+
+    if config.general.output_format == OutputFormat::JSON { msgln("{}"); }
+
+    Ok(())
 }
 
 fn status(config: &Config, details: bool) -> Result<()> {
@@ -147,7 +169,7 @@ fn get_centerdevice_status_json() -> Result<String> {
 fn output(json: &str, format: &OutputFormat, details: bool) -> Result<()> {
     match *format {
         OutputFormat::HUMAN => output_human(json, details),
-        OutputFormat::JSON  => output::as_json(json)
+        OutputFormat::JSON => output::as_json(json)
             .chain_err(|| ErrorKind::CenterDeviceStatusFailed),
     }
 }
