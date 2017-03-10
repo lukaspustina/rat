@@ -1,24 +1,36 @@
-# Rest Api Tool
+# RAT - the Rest Api Tool
 
 ## Available Clients
 
+**Pocket**
 ```bash
 rat pocket auth
-rat pocket list [--details] [--tag <tag>] [--state unread|archive|all] [--sort newest|oldest|title|site ]
-rat pocket search [--details] [--tag <tag>] [--state unread|archive|all] [--sort newest|oldest|title|site ] <in title or url>
-rat pocket archive|readd|favorite|unfavorite|delete <id>...
+rat pocket list
+rat pocket search
+rat pocket archive
+rat pocket readd
+rat pocket favorite
+rat pocket unfavorite
+rat pocket delete
+```
 
+**CenterDevice**
+```bash
 rat centerdevice auth
-rat centerdevice browse-status [--details]
-rat centerdevice status [--details]
-rat centerdevice upload [--filename <filename>] [--mime-type <mime type>] [--tag <tag1> --tag <tag...>] <file>
+rat centerdevice status
+rat centerdevice upload
+```
+
+**Slack**
+```bash
+rat slack auth
 ```
 
 ## Installation
 
 ### macOS with Homebrew
 
-```
+```bash
 brew install lukaspustina/os/rat
 ```
 
@@ -49,7 +61,7 @@ Create a [new application](https://getpocket.com/developer/apps/new) and add the
 
 `rat pocket auth` and follow the instructions.
 
-#### Archive| Readd| Favorite| Unfavorite | Delete
+#### Archive | Readd | Favorite | Unfavorite | Delete
 
 `rat pocket archive|readd|favorite|unfavorite|delete <article ids>...`
 
@@ -86,7 +98,7 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 
 ## Clients to Come
 
-```
+```bash
 rat centerdevice search <search>
 rat centerdevice download <document-id>
 
@@ -153,7 +165,7 @@ rat bosun silence set
 
 * [ ] Make better use of error_chain by using Foreign errors
 
-* [ ] Replace curl by hyper
+* [ ] Replace curl with hyper
 
 * [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to remove "Curl failed" string Errors.
 
