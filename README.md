@@ -17,6 +17,7 @@ rat pocket delete
 **CenterDevice**
 ```bash
 rat centerdevice auth
+rat centerdevice search
 rat centerdevice status
 rat centerdevice upload
 ```
@@ -43,6 +44,10 @@ brew install lukaspustina/os/rat
 ##### Authenticate rat
 
 `rat centerdevice auth` and follow the instructions.
+
+##### Search document
+
+`rat centerdevice search -f README.md -t documentation -t rat "the Rest Api Tool"`
 
 ##### Upload document
 
@@ -99,7 +104,6 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 ## Clients to Come
 
 ```bash
-rat centerdevice search <search>
 rat centerdevice download <document-id>
 
 rat elasticsearch browse

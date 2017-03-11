@@ -1,5 +1,3 @@
-// https://mikedilger.github.io/formdata/formdata/index.html
-
 use super::client;
 
 use config::{Config, OutputFormat};

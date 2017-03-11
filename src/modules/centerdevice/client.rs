@@ -1,4 +1,101 @@
+pub use self::search::search_documents;
 pub use self::upload::upload_document;
+
+mod search {
+    use utils::console::*;
+
+    use hyper::Client;
+    use hyper::header::{ContentType, Authorization, Bearer, Accept, qitem};
+    use hyper::net::HttpsConnector;
+    use hyper_native_tls::NativeTlsClient;
+    use serde_json;
+    use std::io::Read;
+    use std::str;
+
+    error_chain! {
+        errors {
+            HttpSearchCallFailed {
+                description("failed to make http search call")
+                display("failed to make http search call")
+            }
+        }
+    }
+
+
+    #[derive(Serialize, Debug)]
+    struct Search<'a> {
+        action: &'a str,
+        params: Params<'a>,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Params<'a> {
+        query: Query<'a>,
+        filter: Filter<'a>,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Query<'a> {
+        #[serde(skip_serializing_if = "Option::is_none")] text: Option<&'a str>,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Filter<'a> {
+        #[serde(skip_serializing_if = "Option::is_none")] filenames: Option<Vec<&'a str>>,
+        #[serde(skip_serializing_if = "Option::is_none")] tags: Option<Vec<&'a str>>,
+    }
+
+    impl<'a> Search<'a> {
+        pub fn new(filenames: Option<Vec<&'a str>> , tags: Option<Vec<&'a str>>, fulltext: Option<&'a str>) -> Self {
+            let filter = Filter { filenames: filenames, tags: tags };
+            let query = Query { text: fulltext };
+            let params = Params { query: query, filter: filter };
+            let search = Search { action: "search", params: params };
+
+            search
+        }
+    }
+
+    pub fn search_documents(
+        access_token: &str,
+        filenames: Option<Vec<&str>>,
+        tags: Option<Vec<&str>>,
+        fulltext: Option<&str>) -> Result<String> {
+
+        do_search_documents(access_token, filenames, tags, fulltext)
+            .chain_err(|| ErrorKind::HttpSearchCallFailed)
+    }
+
+    fn do_search_documents(
+        access_token: &str,
+        filenames: Option<Vec<&str>>,
+        tags: Option<Vec<&str>>,
+        fulltext: Option<&str>) -> Result<String> {
+
+        let search = Search::new(filenames, tags, fulltext);
+        let search_json = serde_json::to_string(&search).chain_err(|| "JSON serialization failed")?;
+
+        verbose(format!("search = '{:?}'", search_json));
+
+        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
+        let connector = HttpsConnector::new(ssl);
+        let client = Client::with_connector(connector);
+
+        let request = client.post("https://api.centerdevice.de/v2/documents")
+            .header(Authorization(Bearer { token: access_token.to_string() }))
+            .header(ContentType(mime!(Application/Json)))
+            .header(Accept(vec![qitem(mime!(Application/Json; Charset=Utf8))]))
+            .body(&search_json);
+
+        let mut response = request.send().chain_err(|| "Failed to finish http request")?;
+
+        let mut body = Vec::new();
+        response.read_to_end(&mut body).chain_err(|| "Failed to read server response")?;
+        let response_body = String::from_utf8_lossy(&body).to_string();
+
+        Ok(response_body)
+    }
+}
 
 mod upload {
     use utils::console::*;
@@ -69,7 +166,6 @@ mod upload {
         title: Option<&str>,
         tags: Option<Vec<&str>>)
         -> Result<String> {
-
         do_upload_document(access_token, file, filename, mime, title, tags)
             .chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
@@ -81,7 +177,6 @@ mod upload {
         mime: Mime,
         title: Option<&str>,
         tags: Option<Vec<&str>>) -> Result<String> {
-
         let doc_metadata_json_bytes = create_doc_metadata(file, filename, title, tags)?.into_bytes();
         let boundary = generate_boundary(&doc_metadata_json_bytes);
         let boundary_bytes = boundary.clone().into_bytes();
