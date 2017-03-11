@@ -15,6 +15,7 @@ extern crate mime_guess;
 extern crate mime_multipart;
 extern crate select;
 #[macro_use] extern crate serde_derive;
+extern crate serde;
 extern crate serde_json;
 extern crate serde_urlencoded;
 extern crate term_painter;
