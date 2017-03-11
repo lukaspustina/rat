@@ -19,6 +19,11 @@ pub mod console {
     }
 
     pub fn verbose<T: Into<String>>(msg: T) {
+        if is_relevant(Verbosity::VERBOSE) { print!("{}", Cyan.paint(msg.into())) }
+        let _ = std::io::stdout().flush();
+    }
+
+    pub fn verboseln<T: Into<String>>(msg: T) {
         if is_relevant(Verbosity::VERBOSE) { println!("{}", Cyan.paint(msg.into())) }
     }
 

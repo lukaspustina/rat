@@ -17,6 +17,7 @@ rat pocket delete
 **CenterDevice**
 ```bash
 rat centerdevice auth
+rat centerdevice download
 rat centerdevice search
 rat centerdevice status
 rat centerdevice upload
@@ -44,6 +45,10 @@ brew install lukaspustina/os/rat
 ##### Authenticate rat
 
 `rat centerdevice auth` and follow the instructions.
+
+##### Download document
+
+`rat centerdevice download excbd68a-c397-id46-9350-a4fd4022fe8c`
 
 ##### Search document
 
@@ -104,8 +109,6 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 ## Clients to Come
 
 ```bash
-rat centerdevice download <document-id>
-
 rat elasticsearch browse
 rat elasticsearch status -- curl -s http://es-m-05:9200/_cluster/health?level=shards
 rat elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
@@ -166,6 +169,8 @@ rat bosun silence set
 * [X] Move centerdevice browse-status to status --browse
 
 * [X] Enchance Auths by --browser which opens a browser window.
+
+* [ ] Checkout mime_multipart 0.5 with my patch included
 
 * [ ] Make better use of error_chain by using Foreign errors
 

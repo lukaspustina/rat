@@ -1,5 +1,132 @@
+pub use self::download::download_document;
 pub use self::search::search_documents;
 pub use self::upload::upload_document;
+
+mod download {
+    use utils::console::*;
+
+    use hyper::Client;
+    use hyper::client::Response;
+    use hyper::header::{ContentType, ContentDisposition, ContentLength, DispositionParam, Authorization, Bearer};
+    use hyper::net::HttpsConnector;
+    use hyper_native_tls::NativeTlsClient;
+    use std::fs::File;
+    use std::io;
+    use std::io::{Read, Write};
+    use std::str;
+
+    error_chain! {
+        errors {
+            HttpDownloadCallFailed {
+                description("failed to make http download call")
+                display("failed to make http download call")
+            }
+
+            FailedSetFilename {
+                description("failed set filename from cli parameter and content disposition header")
+                display("failed set filename from cli parameter and content disposition header")
+            }
+
+            FailedContentLength {
+                description("failed get content length from response header")
+                display("failed get content length from response header")
+            }
+        }
+    }
+
+
+    pub fn download_document(
+        access_token: &str,
+        filename: Option<&str>,
+        document_id: &str) -> Result<()> {
+        do_download_document(access_token, filename, document_id)
+            .chain_err(|| ErrorKind::HttpDownloadCallFailed)
+    }
+
+    fn do_download_document(
+        access_token: &str,
+        filename: Option<&str>,
+        document_id: &str) -> Result<()> {
+        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
+        let connector = HttpsConnector::new(ssl);
+        let client = Client::with_connector(connector);
+
+        let url = format!("https://api.centerdevice.de/v2/document/{}", document_id);
+        let request = client.get(&url)
+            .header(Authorization(Bearer { token: access_token.to_string() }))
+            .header(ContentType(mime!(Star/Star)));
+
+        let mut response = request.send().chain_err(|| "Failed to finish http request")?;
+
+        let filename = get_filename(filename, &response)?;
+        let size = get_content_length(&response)? as usize;
+
+        verbose(format!("Retrieving {} bytes ", size));
+        let w_size = write_to_file(&filename, &mut response)?;
+        verboseln("done.");
+
+        if w_size != size {
+            bail!("Retrieved number of bytes ({}) does not match expected bytes ({}).", w_size, size);
+        }
+
+        Ok(())
+    }
+
+    fn get_filename(filename: Option<&str>, response: &Response) -> Result<String> {
+        let filename = if let Some(_filename) = filename {
+            _filename
+        } else {
+            let mut _filename = None;
+            let content_disposition: &ContentDisposition = response.headers.get()
+                .ok_or(ErrorKind::FailedSetFilename)?;
+            for cp in &content_disposition.parameters {
+                match *cp {
+                    DispositionParam::Filename(_, _, ref f) => {
+                        _filename = Some(
+                            str::from_utf8(&f).chain_err(|| ErrorKind::FailedSetFilename)?);
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+            _filename.ok_or(ErrorKind::FailedSetFilename)?
+        };
+        Ok(filename.to_string())
+    }
+
+    fn get_content_length(response: &Response) -> Result<u64> {
+        let content_length: &ContentLength = response.headers.get()
+            .ok_or(ErrorKind::FailedContentLength)?;
+        match *content_length {
+            ContentLength(size) => return Ok(size)
+        }
+    }
+
+    fn write_to_file(filename: &str, response: &mut Response) -> Result<usize> {
+        let mut out = File::create(filename).chain_err(|| "Failed to create destination file")?;
+
+        let mut buf = [0; 128 * 1024];
+        let mut written: usize = 0;
+        let mut mega_bytes: usize = 0;
+        loop {
+            let len = match response.read(&mut buf) {
+                Ok(0) => break,  // EOF.
+                Ok(len) => len,
+                Err(ref err) if err.kind() == io::ErrorKind::Interrupted => continue,
+                Err(_) => bail!("Could not read from server response")
+            };
+            written += len;
+            if (written / (1024*1024)) - mega_bytes > 0 {
+                mega_bytes += 1;
+                verbose(".");
+            }
+            out.write_all(&buf[..len]).chain_err(|| "Could not write to file")?;
+        }
+
+        Ok(written)
+    }
+
+}
 
 mod search {
     use utils::console::*;
@@ -46,7 +173,7 @@ mod search {
     }
 
     impl<'a> Search<'a> {
-        pub fn new(filenames: Option<Vec<&'a str>> , tags: Option<Vec<&'a str>>, fulltext: Option<&'a str>) -> Self {
+        pub fn new(filenames: Option<Vec<&'a str>>, tags: Option<Vec<&'a str>>, fulltext: Option<&'a str>) -> Self {
             let filter = Filter { filenames: filenames, tags: tags };
             let query = Query { text: fulltext };
             let params = Params { query: query, filter: filter };
@@ -61,7 +188,6 @@ mod search {
         filenames: Option<Vec<&str>>,
         tags: Option<Vec<&str>>,
         fulltext: Option<&str>) -> Result<String> {
-
         do_search_documents(access_token, filenames, tags, fulltext)
             .chain_err(|| ErrorKind::HttpSearchCallFailed)
     }
@@ -71,11 +197,10 @@ mod search {
         filenames: Option<Vec<&str>>,
         tags: Option<Vec<&str>>,
         fulltext: Option<&str>) -> Result<String> {
-
         let search = Search::new(filenames, tags, fulltext);
         let search_json = serde_json::to_string(&search).chain_err(|| "JSON serialization failed")?;
 
-        verbose(format!("search = '{:?}'", search_json));
+        verboseln(format!("search = '{:?}'", search_json));
 
         let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
         let connector = HttpsConnector::new(ssl);
@@ -207,7 +332,7 @@ mod upload {
         let doc_metadata = DocumentMetadata::new(filename, size, title, tags);
         let doc_metadata_json = serde_json::to_string(&doc_metadata).chain_err(|| "JSON serialization failed")?;
 
-        verbose(format!("document metadata = '{:?}'", doc_metadata_json));
+        verboseln(format!("document metadata = '{:?}'", doc_metadata_json));
 
         Ok(doc_metadata_json)
     }
