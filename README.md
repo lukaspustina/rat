@@ -174,7 +174,7 @@ rat bosun silence set
 
     * [X] Add --since and --until parameters for search
 
-    * [ ] Select human outout fields: id, title, url
+    * [X] Select human outout fields: id, title, url
 
     * [ ] Update documentation
 
