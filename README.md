@@ -170,21 +170,27 @@ rat bosun silence set
 
 * [X] Enchance Auths by --browser which opens a browser window.
 
-* [ ] Checkout mime_multipart 0.5 with my patch included
+* [ ] Enhance Pocket
+
+    * [X] Add --since and --until parameters for search
+
+    * [ ] Select human outout fields: id, title, url
+
+    * [ ] Update documentation
+
+* [ ] Pocket: Move HTTP calls to client mod
+
+* [ ] Refactor auth modules - cf. branch
+
+* [ ] Slack: Move HTTP calls to client mod
+
+* [X] Checkout mime_multipart 0.5 with my patch included
 
 * [ ] Make better use of error_chain by using Foreign errors
 
 * [ ] Replace curl with hyper
 
 * [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to remove "Curl failed" string Errors.
-
-* [ ] Enhance Pocket
-
-    * [ ] Add --since and --until parameters for search
-
-    * [ ] Select human outout fields: id, title, url
-
-    * [ ] Update documentation
 
 * [ ] Travis
 

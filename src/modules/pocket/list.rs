@@ -2,11 +2,14 @@ use config::{Config, OutputFormat};
 use net::{curl, HttpVerb};
 use utils::console::*;
 use utils::output;
+use utils::time;
 
+use chrono::{DateTime, NaiveDateTime, UTC};
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
 use std::collections::HashMap;
 use std::str;
+use std::time::Duration;
 
 pub const NAME: &'static str = "list";
 
@@ -107,6 +110,14 @@ pub fn build_sub_cli() -> App<'static, 'static> {
             .possible_values(&["unread", "archive", "all"])
             .default_value("unread")
             .help("Select articles to list"))
+        .arg(Arg::with_name("since")
+            .long("since")
+            .takes_value(true)
+            .help("Select articles added since <duration> ago; e.g. '2w 3d 12m. Truncates fields from original JSON output."))
+        .arg(Arg::with_name("until")
+            .long("until")
+            .takes_value(true)
+            .help("Select articles added until <duration> ago; e.g. '2w 3d 12m. Truncates fields from original JSON output."))
         .arg(Arg::with_name("sort")
             .long("sort")
             .takes_value(true)
@@ -126,8 +137,16 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     };
     let sort = Some(args.value_of("sort").unwrap().into());
     let detail_type = args.is_present("details").into();
-    let search = if args.is_present("search") {
-        Some(args.value_of("search").unwrap())
+    let search = args.value_of("search");
+    let since = if let Some(since) = args.value_of("since") {
+        let unix_ts = time::parse_duration(since).chain_err(|| "Could not parse since duration")?;
+        Some(unix_ts)
+    } else {
+        None
+    };
+    let until = if let Some(until) = args.value_of("until") {
+        let unix_ts = time::parse_duration(until).chain_err(|| "Could not parse until duration")?;
+        Some(unix_ts)
     } else {
         None
     };
@@ -143,7 +162,14 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     };
 
     info(format!("Getting list of your articles ..."));
-    let json = get(config, &request).chain_err(|| ErrorKind::PocketListFailed)?;
+    let mut json = get(config, &request).chain_err(|| ErrorKind::PocketListFailed)?;
+
+    if since.is_some() || until.is_some() {
+        let list: ListResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+        info(format!("Filtering list of your {} article(s) ...", list.list.len()));
+        let list = list.filter(&since, &until);
+        json = serde_json::to_string(&list).chain_err(|| "JSON serialization failed")?;
+    }
 
     output(&json, &config.general.output_format)
 }
@@ -151,13 +177,15 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 #[allow(unused_variables)] // for status codes
 fn get(config: &Config, request: &Request) -> Result<String> {
     let mut buffer = Vec::new();
-    let request_json = &serde_json::to_string(&request).chain_err(|| "JSON serialization failed")?.into_bytes();
+    let request_json = serde_json::to_string(&request).chain_err(|| "JSON serialization failed")?;
+
+    verboseln(format!("request = {}", request_json));
     // TODO: Only continue if 200
     let response_status_code = curl(
         "https://getpocket.com/v3/get",
         HttpVerb::POST,
         Some(&HEADERS),
-        Some(request_json),
+        Some(&request_json.into_bytes()),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;
     let response_str = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
@@ -168,35 +196,65 @@ fn get(config: &Config, request: &Request) -> Result<String> {
 fn output(json: &str, format: &OutputFormat) -> Result<()> {
     match *format {
         OutputFormat::HUMAN => output_human(json),
-        OutputFormat::JSON  => output::as_json(json)
+        OutputFormat::JSON => output::as_json(json)
             .chain_err(|| ErrorKind::PocketListFailed),
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 struct ListResult {
     status: i32,
     complete: i32,
     list: HashMap<String, Article>,
 }
 
-#[derive(Deserialize, Debug)]
+impl ListResult {
+    fn filter(self, since: &Option<Duration>, until: &Option<Duration>) -> Self {
+        let mut new_list: HashMap<String, Article> = HashMap::new();
+        for (k, v) in self.list {
+            if let &Some(since) = since {
+                if v.time_added().unwrap() < since { continue };
+            }
+            if let &Some(until) = until {
+                if v.time_added().unwrap()> until { continue };
+            }
+            new_list.insert(k, v);
+        }
+
+        ListResult{ status: self.status, complete: self.complete, list: new_list }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 struct Article {
     item_id: String,
     resolved_title: String,
     resolved_url: String,
+    time_added: String,
+    time_updated: String,
+}
+
+impl Article {
+    fn time_added(&self) -> Result<Duration> {
+        let secs: u64 = self.time_added.parse().chain_err(|| "Failed to parse time")?;
+        Ok(Duration::from_secs(secs))
+    }
 }
 
 fn output_human(json: &str) -> Result<()> {
     let list: ListResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
 
     if list.status == 1 {
-        msgln(format!("Received {} articles.", list.list.values().len()));
+        msgln(format!("Received {} article(s).", list.list.values().len()));
     } else {
         msgln("Receiving articles failed.");
     }
     for a in list.list.values() {
-        msgln(format!("{}: '{}', {}", a.item_id, a.resolved_title, a.resolved_url));
+        let d = a.time_added()?;
+        let dt = DateTime::<UTC>::from_utc(
+            NaiveDateTime::from_timestamp(d.as_secs() as i64, d.subsec_nanos()), UTC);
+        msgln(format!("* {}: '{}', {}, added {}",
+                      a.item_id, a.resolved_title, a.resolved_url, dt.to_rfc3339()));
     }
 
     Ok(())

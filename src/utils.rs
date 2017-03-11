@@ -71,3 +71,30 @@ pub mod output {
         Ok(())
     }
 }
+
+pub mod time {
+    use std::time::{Duration, UNIX_EPOCH, SystemTime};
+    use humantime;
+
+    error_chain! {
+        errors {
+            FailedToParseDuration {
+                description("Failed to parse duration")
+                display("Failed to parse duration")
+            }
+        }
+    }
+    pub fn parse_duration(since: &str) -> Result<Duration> {
+        let duration: Duration = humantime::parse_duration(since).chain_err(|| ErrorKind::FailedToParseDuration)?;
+        let now = SystemTime::now();
+        let history = (now - duration).duration_since(UNIX_EPOCH).chain_err(|| ErrorKind::FailedToParseDuration)?;
+
+        Ok(history)
+    }
+
+    pub fn parse_duration_to_unix_ts(since: &str) -> Result<u64> {
+        let unix_ts = parse_duration(since)?.as_secs();
+
+        Ok(unix_ts)
+    }
+}
