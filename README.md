@@ -2,6 +2,15 @@
 
 ## Available Clients
 
+**CenterDevice**
+```bash
+rat centerdevice auth
+rat centerdevice download
+rat centerdevice search
+rat centerdevice status
+rat centerdevice upload
+```
+
 **Pocket**
 ```bash
 rat pocket auth
@@ -12,15 +21,6 @@ rat pocket readd
 rat pocket favorite
 rat pocket unfavorite
 rat pocket delete
-```
-
-**CenterDevice**
-```bash
-rat centerdevice auth
-rat centerdevice download
-rat centerdevice search
-rat centerdevice status
-rat centerdevice upload
 ```
 
 **Slack**
@@ -39,6 +39,13 @@ brew install lukaspustina/os/rat
 
 ## Usage
 
+### General
+
+There are two response output modes, i.e., JSON and HUMAN, and three message levels, i.e., QUIET, NORMAL, and VERBOSE.
+
+In human output mode tries to give a concise representation if the received information. In json output mode, rat tries to pass the whole json response to the user -- if any is available. The output mode can be selected with the parameter `--output <humen|json>`, e.g., `rat --output json ...`
+
+The message output levels configure how talkative rat is during execution. The quiet level reduces outputs to real responses only while the normal level tries to give some feedback to the user about the start and end of a request. The verbose level goes one step further and tries to inform the user about each step of the processing. The message level can be chosen with the parameters `--quiet` or `--verbose`, respectively. If none of these switches is activated, the message level is set to normal. For example, `rat --verbose ...` selects the verbose message level.
 
 ### CenterDevice
 
@@ -48,11 +55,15 @@ brew install lukaspustina/os/rat
 
 ##### Download document
 
-`rat centerdevice download excbd68a-c397-id46-9350-a4fd4022fe8c`
+* Download document into current directory with original filename: `rat centerdevice download excbd68a-c397-id46-9350-a4fd4022fe8c`
+
+* Download document with new filename: `rat centerdevice download excbd68a-c397-id46-9350-a4fd4022fe8c -f new_filename`
 
 ##### Search document
 
-`rat centerdevice search -f README.md -t documentation -t rat "the Rest Api Tool"`
+* Search for documents with filename _README.md_, tagged with _documentation_, and some fulltext: `rat centerdevice search -f README.md -t documentation -t rat "the Rest Api Tool"`
+
+* Search again, but now post-process JSON response with `jq`: `rat --output json --quiet centerdevice search -f README.md -t documentation "the Rest Api Tool" | jq .`
 
 ##### Upload document
 
@@ -77,19 +88,25 @@ Create a [new application](https://getpocket.com/developer/apps/new) and add the
 
 #### List
 
-##### Filter articles for ids and titles
+List all
 
-`rat -o json pocket list | jq '.list | .[] | { title: .given_title, id: .item_id }'`
+* unread articeles: `rat pocket list`
 
-##### Filter articles for ids and titles and search for Rust in title and URL
+* archived articeles: `rat pocket list --state archived`
 
-* `rat -o json pocket search Rust | jq -r '.list | .[] | { title: .given_title, id: .item_id }'`
+* articles: `rat pocket list --state all`
 
-* `rat -o json pocket list | jq '.list | .[] | { title: .given_title, id: .item_id, url: .given_url } | select((.title | test("Rust")) or (.url | test("Rust")))'`
+* unread articles tagged with _Rust_: `rat pocket list --tag Rust`
 
-##### Filter ids, search for Rust in title and URL, make comma seperated list
+* unread articles, added between 2 weeks and 1 week ago: `rat pocket list --since 2w --until 1w`
 
-`rat -o json pocket search Rust | jq -r '.list | .[] | .item_id' | paste -s -d , -`
+* List ids of all unread articles added 2 weeks or later ago and create a comma separated list: `rat pocket list --until 2w --output id | paste -s -d . -`
+
+##### Advanced listing
+
+* List all unread articles that contain a video: `rat --output json --quiet pocket list | jq '.list | .[] | select(.has_video | test("1") ) | { id: .item_id, title: .resolved_title }'`
+
+* Filter articles that contain Rust in title and URL, and create comma separated id list: `rat -o json --quiet pocket list | jq -r '.list | .[] | { title: .given_title, id: .item_id, url: .given_url } | select((.title | test("Rust")) or (.url | test("Rust"))) | .id' | paste -s -d , -`
 
 
 ### Slack
@@ -110,8 +127,8 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 
 ```bash
 rat elasticsearch browse
-rat elasticsearch status -- curl -s http://es-m-05:9200/_cluster/health?level=shards
-rat elasticsearch health -- curl -s http://es-m-05:9200/_cluster/health
+rat elasticsearch status -- curl -s http://<host>:9200/_cluster/health?level=shards
+rat elasticsearch health -- curl -s http://<host>:9200/_cluster/health
 
 rat slack channel list
 rat slack user list
