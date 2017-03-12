@@ -97,9 +97,8 @@ mod download {
     fn get_content_length(response: &Response) -> Result<u64> {
         let content_length: &ContentLength = response.headers.get()
             .ok_or(ErrorKind::FailedContentLength)?;
-        match *content_length {
-            ContentLength(size) => return Ok(size)
-        }
+        let &ContentLength(size) = content_length;
+        Ok(size)
     }
 
     fn write_to_file(filename: &str, response: &mut Response) -> Result<usize> {
