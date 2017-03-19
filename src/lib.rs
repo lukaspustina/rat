@@ -13,6 +13,7 @@ extern crate itertools;
 #[macro_use] extern crate mime;
 extern crate mime_guess;
 extern crate mime_multipart;
+extern crate select;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 extern crate serde_urlencoded;
