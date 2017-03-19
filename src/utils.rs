@@ -67,7 +67,7 @@ pub mod output {
     }
 
     pub fn as_json(json: &str) -> Result<()> {
-        msgln(format!("{}", json));
+        msgln(json);
         Ok(())
     }
 }

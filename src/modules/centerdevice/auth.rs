@@ -60,10 +60,10 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
 
     let auth_url = format!("https://auth.centerdevice.de/authorize?{}", parameters_enc);
     if use_browser {
-        msgln(format!("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ..."));
+        msgln("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ...");
         webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
     } else {
-        msgln(format!("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ..."));
+        msgln("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ...");
         msgln(format!("\n\t{}\n", auth_url));
     }
     msg("Authentication code: ");
@@ -88,7 +88,7 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
     let mut buffer = Vec::new();
     // TODO: Only continue if 200
     let response_status_code = curl(
-        &url,
+        url,
         HttpVerb::POST,
         Some(headers),
         Some(&input),
@@ -101,7 +101,7 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
         msgln(str::from_utf8(&buffer).chain_err(|| "Failed to print buffer")?);
     }
     let step_2_result: Step2Result = serde_json::from_slice(&buffer).chain_err(|| "JSON parsing failed")?;
-    msgln(format!("Received access and refresh token. Please add the following lines to your configuration, section '[centerdevice]'."));
+    msgln("Received access and refresh token. Please add the following lines to your configuration, section '[centerdevice]'.");
     msgln(format!("\nrefresh_token = '{}'\naccess_token = '{}'\n", step_2_result.refresh_token, step_2_result.access_token));
 
     Ok(())

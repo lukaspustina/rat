@@ -44,8 +44,8 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let doc_id = args.value_of("id").unwrap();
 
     info(format!("Downloading document {} ...", doc_id));
-    let _ = client::download_document(
-        &config.centerdevice.access_token.as_ref().unwrap(), filename, doc_id)
+    client::download_document(
+        config.centerdevice.access_token.as_ref().unwrap(), filename, doc_id)
         .chain_err(|| ErrorKind::CenterDeviceDownloadFailed)?;
 
     output("{}", &config.general.output_format)
@@ -54,6 +54,6 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 fn output(json: &str, format: &OutputFormat) -> Result<()> {
     match *format {
         OutputFormat::HUMAN => Ok(()),
-        OutputFormat::JSON => output::as_json(&json).chain_err(|| ErrorKind::OutputFailed),
+        OutputFormat::JSON => output::as_json(json).chain_err(|| ErrorKind::OutputFailed),
     }
 }

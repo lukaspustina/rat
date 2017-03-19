@@ -65,6 +65,6 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 }
 
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
-    info(format!("Searching for articles ..."));
+    info("Searching for articles ...");
     list::call(args, config).chain_err( || ErrorKind::PocketSearchFailed)
 }

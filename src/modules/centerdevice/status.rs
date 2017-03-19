@@ -131,18 +131,19 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let browser = args.ok_or(false).unwrap().is_present("browser");
 
     if browser {
-        info(format!("Opening CenterDevice Status in default browser ..."));
+        info("Opening CenterDevice Status in default browser ...");
         browse(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
     } else {
-        info(format!("Getting CenterDevice Status ..."));
+        info("Getting CenterDevice Status ...");
         status(config, details).chain_err(|| ErrorKind::CenterDeviceStatusFailed)
     }
 }
 
 fn browse(config: &Config, details: bool) -> Result<()> {
-    match details {
-        true  => webbrowser::open("http://status.centerdevice.de/details.html"),
-        false => webbrowser::open("http://status.centerdevice.de")
+    if details {
+        webbrowser::open("http://status.centerdevice.de/details.html")
+    } else {
+        webbrowser::open("http://status.centerdevice.de")
     }.chain_err(|| "Failed to open default browser")?;
 
     if config.general.output_format == OutputFormat::JSON { msgln("{}"); }
@@ -175,7 +176,7 @@ fn output(json: &str, format: &OutputFormat, details: bool) -> Result<()> {
 }
 
 fn output_human(json: &str, details: bool) -> Result<()> {
-    let status: CenterDeviceStatus = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+    let status: CenterDeviceStatus = serde_json::from_str(json).chain_err(|| "JSON parsing failed")?;
     match (&status.Status, details) {
         (&Status::Okay, false) =>
             msgln(format!("CenterDevice status is {:?}.", status.Status)),

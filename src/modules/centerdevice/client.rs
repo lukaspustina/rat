@@ -80,17 +80,15 @@ mod download {
             let content_disposition: &ContentDisposition = response.headers.get()
                 .ok_or(ErrorKind::FailedSetFilename)?;
             for cp in &content_disposition.parameters {
-                match *cp {
-                    DispositionParam::Filename(_, _, ref f) => {
-                        _filename = Some(
-                            str::from_utf8(&f).chain_err(|| ErrorKind::FailedSetFilename)?);
-                        break;
-                    }
-                    _ => {}
+                if let DispositionParam::Filename(_, _, ref f) = *cp {
+                    _filename = Some(
+                        str::from_utf8(f).chain_err(|| ErrorKind::FailedSetFilename)?);
+                    break;
                 }
             }
             _filename.ok_or(ErrorKind::FailedSetFilename)?
         };
+
         Ok(filename.to_string())
     }
 
@@ -115,7 +113,7 @@ mod download {
                 Err(_) => bail!("Could not read from server response")
             };
             written += len;
-            if (written / (1024*1024)) - mega_bytes > 0 {
+            if (written / (1024 * 1024)) - mega_bytes > 0 {
                 mega_bytes += 1;
                 verbose(".");
             }
@@ -124,7 +122,6 @@ mod download {
 
         Ok(written)
     }
-
 }
 
 mod search {
@@ -139,13 +136,13 @@ mod search {
     use std::str;
 
     error_chain! {
-        errors {
-            HttpSearchCallFailed {
-                description("failed to make http search call")
-                display("failed to make http search call")
-            }
-        }
-    }
+errors {
+HttpSearchCallFailed {
+description("failed to make http search call")
+display("failed to make http search call")
+}
+}
+}
 
 
     #[derive(Serialize, Debug)]
@@ -176,9 +173,8 @@ mod search {
             let filter = Filter { filenames: filenames, tags: tags };
             let query = Query { text: fulltext };
             let params = Params { query: query, filter: filter };
-            let search = Search { action: "search", params: params };
 
-            search
+            Search { action: "search", params: params }
         }
     }
 
@@ -207,8 +203,8 @@ mod search {
 
         let request = client.post("https://api.centerdevice.de/v2/documents")
             .header(Authorization(Bearer { token: access_token.to_string() }))
-            .header(ContentType(mime!(Application/Json)))
-            .header(Accept(vec![qitem(mime!(Application/Json; Charset=Utf8))]))
+            .header(ContentType(mime!(Application / Json)))
+            .header(Accept(vec![qitem(mime!(Application/ Json; Charset = Utf8))]))
             .body(&search_json);
 
         let mut response = request.send().chain_err(|| "Failed to finish http request")?;
@@ -241,13 +237,13 @@ mod upload {
     use std::str;
 
     error_chain! {
-        errors {
-            HttpUploadCallFailed {
-                description("failed to make http upload call")
-                display("failed to make http upload call")
-            }
-        }
-    }
+errors {
+HttpUploadCallFailed {
+description("failed to make http upload call")
+display("failed to make http upload call")
+}
+}
+}
 
     #[derive(Serialize, Debug)]
     struct DocumentMetadata<'a> {
@@ -312,8 +308,8 @@ mod upload {
         let url = ::hyper::Url::parse("https://api.centerdevice.de/v2/documents").chain_err(|| "Failed to parse URL")?;
         let mut client = Request::with_connector(Method::Post, url, &connector).chain_err(|| "Failed to create client")?;
         client.headers_mut().set(Authorization(Bearer { token: access_token.to_string() }));
-        client.headers_mut().set(ContentType(mime!(Multipart/FormData; Boundary=(boundary))));
-        client.headers_mut().set(Accept(vec![qitem(mime!(Application/Json; Charset=Utf8))]));
+        client.headers_mut().set(ContentType(mime!(Multipart / FormData; Boundary = (boundary))));
+        client.headers_mut().set(Accept(vec![qitem(mime!(Application / Json; Charset = Utf8))]));
 
         let mut request = client.start().chain_err(|| "Failed to start HTTP connection")?;
         write_multipart(&mut request, &boundary_bytes, &nodes).chain_err(|| "Failed to send multipart form-data")?;
@@ -340,7 +336,7 @@ mod upload {
         let mut nodes: Vec<Node> = Vec::with_capacity(2);
 
         let mut h = Headers::new();
-        h.set(ContentType(mime!(Application/Json)));
+        h.set(ContentType(mime!(Application / Json)));
         h.set(ContentDisposition {
             disposition: DispositionType::Ext("form-data".to_string()),
             parameters: vec![DispositionParam::Ext("name".to_string(), "metadata".to_string())],

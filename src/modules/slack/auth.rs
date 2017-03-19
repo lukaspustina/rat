@@ -61,10 +61,10 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
 
     let auth_url = format!("https://slack.com/oauth/authorize?{}", parameters_enc);
     if use_browser {
-        msgln(format!("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ..."));
+        msgln("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ...");
         webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
     } else {
-        msgln(format!("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ..."));
+        msgln("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ...");
         msgln(format!("\n\t{}\n", auth_url));
     }
     msg("Authentication code: ");

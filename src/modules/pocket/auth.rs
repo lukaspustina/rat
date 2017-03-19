@@ -72,7 +72,7 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
     let step_1_status_code = curl(
         "https://getpocket.com/v3/oauth/request",
         HttpVerb::POST,
-        Some(&HEADERS),
+        Some(HEADERS),
         Some(&step_1_json.into_bytes()),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;
@@ -87,10 +87,10 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
     let auth_url = format!("https://getpocket.com/auth/authorize?request_token={}&redirect_uri={}",
                            step_1_result.code, REDIRECT_URI);
     if use_browser {
-        msg(format!("Please authenticate in the web browser window and then press return ..."));
+        msg("Please authenticate in the web browser window and then press return ...");
         webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
     } else {
-        msgln(format!("Please authenticate at the following URL and then press return ..."));
+        msgln("Please authenticate at the following URL and then press return ...");
         msgln(format!("\n\t{}\n", auth_url));
     }
     let mut input = String::new();
@@ -105,7 +105,7 @@ fn auth(config: &Config, use_browser: bool) -> Result<()> {
     let step_3_status_code = curl(
         "https://getpocket.com/v3/oauth/authorize",
         HttpVerb::POST,
-        Some(&HEADERS),
+        Some(HEADERS),
         Some(&step_3_json),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;

@@ -89,7 +89,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
     info(format!("Uploading file '{}' ...", filename));
     let json = client::upload_document(
-        &config.centerdevice.access_token.as_ref().unwrap(), &file_path, &filename, mime_type, title, tags)
+        config.centerdevice.access_token.as_ref().unwrap(), file_path, filename, mime_type, title, tags)
         .chain_err(|| ErrorKind::CenterDeviceUploadFailed)?;
 
     output(&json, &config.general.output_format)
@@ -109,7 +109,7 @@ struct UploadResult {
 }
 
 fn output_human(json: &str) -> Result<()> {
-    let result: UploadResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+    let result: UploadResult = serde_json::from_str(json).chain_err(|| "JSON parsing failed")?;
     msgln(format!("Successfully uploaded document with id '{}'.", result.id));
 
     Ok(())

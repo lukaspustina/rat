@@ -52,9 +52,9 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let tags: Option<Vec<&str>> = args.values_of("tags").map(|c| c.collect());
     let fulltext = args.value_of("fulltext");
 
-    info(format!("Searching for documents ..."));
+    info("Searching for documents ...");
     let json = client::search_documents(
-        &config.centerdevice.access_token.as_ref().unwrap(), filenames, tags, fulltext)
+        config.centerdevice.access_token.as_ref().unwrap(), filenames, tags, fulltext)
         .chain_err(|| ErrorKind::CenterDeviceSearchFailed)?;
 
     output(&json, &config.general.output_format)
@@ -108,7 +108,7 @@ impl fmt::Display for Representations {
 }
 
 fn output_human(json: &str) -> Result<()> {
-    let result: SearchResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+    let result: SearchResult = serde_json::from_str(json).chain_err(|| "JSON parsing failed")?;
     msgln(format!("Found {} document(s) matching the search parameters:", result.hits));
 
     if let Some(documents) = result.documents {

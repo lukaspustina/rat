@@ -30,9 +30,10 @@ error_chain! {
 #[allow(non_camel_case_types)]
 #[derive(Serialize, Debug)]
 // TODO: This enum is never used, everything is string based. Why?
+#[allow(dead_code)]
 enum Action {
     archive,
-    readd,
+    read,
     favorite,
     unfavorite ,
     delete,
@@ -105,7 +106,7 @@ pub fn build_sub_cli() -> Vec<App<'static, 'static>> {
 pub fn call(action: &str, args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let args = args.unwrap();
     let ids = args.values_of("id").unwrap();
-    let actions: Vec<ActionRequest> = ids.map(|id| ActionRequest::new(&action, id)).collect();
+    let actions: Vec<ActionRequest> = ids.map(|id| ActionRequest::new(action, id)).collect();
 
     info(format!("Sending {} action for {} article(s) ...", action, actions.len()));
     let json = send(config, &actions).chain_err(|| ErrorKind::PocketActionFailed(action.to_string()))?;
@@ -154,7 +155,7 @@ struct ActionResults {
 }
 
 fn output_human(json: &str) -> Result<()> {
-    let result: ActionResults = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+    let result: ActionResults = serde_json::from_str(json).chain_err(|| "JSON parsing failed")?;
 
     if result.status == 1 {
         msgln(format!("Received {} results.", result.action_results.len()));

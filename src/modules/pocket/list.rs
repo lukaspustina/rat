@@ -183,7 +183,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
     let request = Request {
         consumer_key: &config.pocket.consumer_key,
-        access_token: &config.pocket.access_token.as_ref().unwrap(),
+        access_token: config.pocket.access_token.as_ref().unwrap(),
         state: state,
         tag: value,
         sort: sort,
@@ -191,7 +191,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         search: search,
     };
 
-    info(format!("Getting list of your articles ..."));
+    info("Getting list of your articles ...");
     let mut json = get(config, &request).chain_err(|| ErrorKind::PocketListFailed)?;
 
     if since.is_some() || until.is_some() {
@@ -214,7 +214,7 @@ fn get(config: &Config, request: &Request) -> Result<String> {
     let response_status_code = curl(
         "https://getpocket.com/v3/get",
         HttpVerb::POST,
-        Some(&HEADERS),
+        Some(HEADERS),
         Some(&request_json.into_bytes()),
         Some(&mut buffer)
     ).chain_err(|| "Curl failed")?;
@@ -242,10 +242,10 @@ impl ListResult {
     fn filter(self, since: &Option<Duration>, until: &Option<Duration>) -> Self {
         let mut new_list: HashMap<String, Article> = HashMap::new();
         for (k, v) in self.list {
-            if let &Some(since) = since {
+            if let Some(since) = *since {
                 if v.time_added().unwrap() < since { continue };
             }
-            if let &Some(until) = until {
+            if let Some(until) = *until {
                 if v.time_added().unwrap() > until { continue };
             }
             new_list.insert(k, v);
@@ -288,7 +288,7 @@ impl Article {
             outputs.push(format!("added {}", &dt.to_rfc3339()));
         }
 
-        let mut out_str: String = format!("{}", outputs.first().unwrap());
+        let mut out_str: String = outputs.first().unwrap().to_string();
         outputs.remove(0);
         for o in outputs {
             out_str = out_str + &format!(", {}", o);
@@ -299,7 +299,7 @@ impl Article {
 }
 
 fn output_human(json: &str, human_output: &HumanOutput) -> Result<()> {
-    let list: ListResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+    let list: ListResult = serde_json::from_str(json).chain_err(|| "JSON parsing failed")?;
 
     if list.status == 1 {
         msgln(format!("Received {} article(s).", list.list.values().len()));

@@ -22,6 +22,8 @@ pub enum HttpVerb {
     POST,
 }
 
+#[allow(unknown_lints)]
+#[allow(needless_pass_by_value)] // verb
 pub fn curl(
     url: &str,
     verb: HttpVerb,
