@@ -28,6 +28,11 @@ rat pocket delete
 rat slack auth
 ```
 
+**Stocks**
+```bash
+rat stocks
+```
+
 ## Installation
 
 ### macOS with Homebrew
@@ -120,6 +125,16 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 ##### Authenticate rat
 
 `rat slack auth` and follow the instructions.
+
+
+### Stocks
+
+#### Scrape current stock price from comdirect web page
+
+* by company name: `rat stocks "Comdirect"`
+
+* by WKN: `rat stocks 542800"`
+
 
 ----
 
