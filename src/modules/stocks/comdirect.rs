@@ -93,10 +93,10 @@ mod test {
     use std::io::Read;
     use std::fs::File;
 
-    fn get_stock_page(file: &str) -> Result<Vec<u8>, std::io::Error> {
-        let mut f = File::open(file)?;
+    fn get_stock_page(file: &str) -> Result<Vec<u8>> {
+        let mut f = File::open(file).unwrap();
         let mut buffer = Vec::new();
-        f.read_to_end(&mut buffer)?;
+        f.read_to_end(&mut buffer).unwrap();
 
         Ok(buffer)
     }
@@ -109,7 +109,8 @@ mod test {
         assert_eq!(db.name, "Deutsche Bank AG Namens-Aktien o.N.");
         assert_eq!(db.wkn, "514000");
         assert_eq!(db.date, "10.03.17\u{a0}\u{a0}17:35:07\u{a0}Uhr");
-        assert_eq!(db.price, "18,26 EUR");
+        assert_eq!(db.price, 18.26f32);
+        assert_eq!(db.currency, "EUR");
     }
 
     #[test]
