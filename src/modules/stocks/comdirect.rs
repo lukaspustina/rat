@@ -18,6 +18,10 @@ error_chain! {
             description("Did not find information in HTML document")
             display("Did not find {} in HTML document", info)
         }
+        ComdirectSearchResultNotUnique {
+            description("The search did not returned an unique result")
+            display("The search did not returned an unique result")
+        }
     }
 }
 
@@ -54,7 +58,7 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
 
     let no_exact_match = document.find(Class("Informer")).nth(0).is_some();
     if no_exact_match {
-        bail!("Could not find exact match for your search");
+        bail!(ErrorKind::ComdirectSearchResultNotUnique);
     }
 
     let name = document.find(Name("h1")).nth(0)
@@ -102,7 +106,7 @@ mod test {
     }
 
     #[test]
-    fn test_parse_ok() {
+    fn test_parse_file_ok() {
         let body = get_stock_page("test/data/stocks/deutsche_bank.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
@@ -114,10 +118,34 @@ mod test {
     }
 
     #[test]
-    fn test_parse_no_exact_match() {
+    fn test_parse_file_no_exact_match() {
         let body = get_stock_page("test/data/stocks/no_exact_match.html").unwrap();
         let db = parse_stock_price(&body);
 
         assert!(db.is_err());
     }
-}
+
+    #[test]
+    fn test_parse_online_ok() {
+        ::utils::console::init(::config::Verbosity::QUIET);
+        let db = scrape_stock_price("Deutsche Bank".to_string()).unwrap();
+
+        assert_eq!(db.name, "Deutsche Bank AG Namens-Aktien o.N.");
+        assert_eq!(db.wkn, "514000");
+        assert!(db.price > 0.00f32);
+        assert_eq!(db.currency, "EUR");
+    }
+
+    #[test]
+    fn test_parse_online_no_exact_match() {
+        ::utils::console::init(::config::Verbosity::QUIET);
+        let result = scrape_stock_price("Deutsche".to_string());
+
+        // TODO: This needs to be nicer.
+        let result_is_not_unique = match result.unwrap_err() {
+            Error(ErrorKind::ComdirectSearchResultNotUnique, _) => true,
+            _ => false
+        };
+        assert!(result_is_not_unique);
+    }
+ }
