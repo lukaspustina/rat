@@ -262,3 +262,27 @@ rat bosun silence set
 
 * [serde](https://serde.rs)
 
+* Testing
+
+    * [Discussion of frameworks](https://www.reddit.com/r/rust/comments/5jbezo/testing_frameworks/)
+
+    * Common Pattern for test setups, also see [this](https://medium.com/@ericdreichert/test-setup-and-teardown-in-rust-without-a-framework-ba32d97aa5ab#.yfl5o576u)
+    ```Rust
+    #[test]
+    fn make_sure_foo_works() {
+        setup(|&fixture_state| { ... });
+    }
+    ```
+
+    * BDD
+
+        * [Stainless](https://github.com/reem/stainless)
+
+        * [rspec](https://github.com/mackwic/rspec)
+
+    * [spectral](https://github.com/cfrancia/spectral)
+
+    * [Quickcheck](https://github.com/BurntSushi/quickcheck)
+
+    * [Mocks](https://github.com/kriomant/mockers)
+
