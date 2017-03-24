@@ -14,8 +14,6 @@ error_chain! {
     }
 }
 
-
-
 pub fn build_sub_cli() -> App<'static, 'static> {
     SubCommand::with_name(NAME)
         .about("Runs authentication process to generate access token")
@@ -25,9 +23,6 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 }
 
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()>  {
-    let use_browser = args.ok_or(false).unwrap().is_present("browser");
-    client::auth(config, use_browser).chain_err(|| ErrorKind::SlackAuthFailed)
+    let open_browser = args.ok_or(false).unwrap().is_present("browser");
+    client::auth(config, open_browser).chain_err(|| ErrorKind::SlackAuthFailed)
 }
-
-
-

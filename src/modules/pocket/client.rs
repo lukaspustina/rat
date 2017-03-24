@@ -51,17 +51,17 @@ mod auth {
         username: String,
     }
 
-    pub fn auth(config: &Config, use_browser: bool) -> Result<()> {
-        do_auth(config, use_browser).chain_err(|| ErrorKind::HttpAuthCallFailed)
+    pub fn auth(config: &Config, open_browser: bool) -> Result<()> {
+        do_auth(config, open_browser).chain_err(|| ErrorKind::HttpAuthCallFailed)
     }
 
-    fn do_auth(config: &Config, use_browser: bool) -> Result<()> {
+    fn do_auth(config: &Config, open_browser: bool) -> Result<()> {
         let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
         let connector = HttpsConnector::new(ssl);
         let client = Client::with_connector(connector);
 
         let code = get_code(&client, config)?;
-        web_auth(&code, use_browser)?;
+        web_auth(&code, open_browser)?;
         let token = exchange_token(&client, &code, config)?;
 
         msgln(format!("Received access token for user '{}'. Please add the following line to your configuration, section '[pocket]'."
@@ -99,11 +99,11 @@ mod auth {
     }
 
     // Step 2 -- Wait for Web UI authentication
-    fn web_auth(code: &Code, use_browser: bool) -> Result<()> {
+    fn web_auth(code: &Code, open_browser: bool) -> Result<()> {
         info("Authorizing code via Pocket ...");
         let auth_url = format!("https://getpocket.com/auth/authorize?request_token={}&redirect_uri={}",
                                code.code, REDIRECT_URI);
-        if use_browser {
+        if open_browser {
             msg("Please authenticate in the web browser window and then press return ...");
             webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
         } else {
