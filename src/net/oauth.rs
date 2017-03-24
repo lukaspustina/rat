@@ -1,12 +1,16 @@
 use config::{Config, OutputFormat};
-use net::{curl, HttpVerb};
 use utils::console::*;
 
 use base64;
+use hyper::Client;
+use hyper::header::{ContentType, Authorization, Basic};
+use hyper::net::HttpsConnector;
+use hyper_native_tls::NativeTlsClient;
 use serde::Deserialize;
 use serde_json;
 use serde_urlencoded;
 use std::io;
+use std::io::Read;
 use std::str;
 use webbrowser;
 
@@ -53,7 +57,7 @@ impl<'a> CliOAuth {
             client_id: self.client_id,
             client_secret: self.client_secret,
             token_endpoint: self.token_endpoint,
-            redirect_uri:  self.redirect_uri,
+            redirect_uri: self.redirect_uri,
         };
 
         Ok(code)
@@ -96,7 +100,7 @@ pub trait CodeWithBasicAuth {
 
 impl CodeWithBasicAuth for Result<Code> {
     fn with_basic_auth(self) -> Result<CodeWithBasicAuthScheme> {
-        self.map(|code| CodeWithBasicAuthScheme{ code: code, grant_type: GrantType::AuthorizationCode })
+        self.map(|code| CodeWithBasicAuthScheme { code: code, grant_type: GrantType::AuthorizationCode })
     }
 }
 
@@ -125,25 +129,25 @@ impl CodeWithBasicAuthScheme {
         let client_credential = format!("{}:{}",
                                         &self.code.client_id, &self.code.client_secret);
         let client_credential_enc = base64::encode(&client_credential.into_bytes()[..]);
-        let headers = &[
-            &format!("Authorization: Basic {}", client_credential_enc),
-            "Content-Type: application/x-www-form-urlencoded"
-        ];
         let grant_type = match self.grant_type {
-           GrantType::AuthorizationCode => "authorization_code"
+            GrantType::AuthorizationCode => "authorization_code"
         };
         let input = format!("grant_type={}&redirect_uri={}&code={}",
-                            grant_type, self.code.redirect_uri, self.code.code).into_bytes();
+                            grant_type, self.code.redirect_uri, self.code.code);
+
+        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
+        let connector = HttpsConnector::new(ssl);
+        let client = Client::with_connector(connector);
+        let mut response = client
+            .post(&self.code.token_endpoint)
+            .header(Authorization(Basic { username: self.code.client_id, password: Some(self.code.client_secret) }))
+            .header(ContentType(mime!(Application / WwwFormUrlEncoded)))
+            .body(&input)
+            .send()
+            .chain_err(|| "Failed to finish HTTP request")?;
 
         let mut buffer = Vec::new();
-        // TODO: Only continue if 200
-        let response_status_code = curl(
-            &self.code.token_endpoint,
-            HttpVerb::POST,
-            Some(headers),
-            Some(&input),
-            Some(&mut buffer)
-        ).chain_err(|| "Curl failed")?;
+        response.read_to_end(&mut buffer).chain_err(|| "Failed to read HTTP response")?;
 
         if config.general.output_format == OutputFormat::JSON {
             info("Received response: ");
@@ -168,7 +172,7 @@ pub trait CodeWithUrl {
 
 impl CodeWithUrl for Result<Code> {
     fn with_url(self) -> Result<CodeWithUrlScheme> {
-        self.map(|code| CodeWithUrlScheme{ code: code })
+        self.map(|code| CodeWithUrlScheme { code: code })
     }
 }
 
@@ -201,15 +205,16 @@ impl CodeWithUrlScheme {
         let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
         let url = format!("https://slack.com/api/oauth.access?{}", parameters_enc);
 
+        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
+        let connector = HttpsConnector::new(ssl);
+        let client = Client::with_connector(connector);
+        let mut response = client
+            .get(&url)
+            .send()
+            .chain_err(|| "Failed to finish HTTP request")?;
+
         let mut buffer = Vec::new();
-        // TODO: Only continue if 200
-        let response_status_code = curl(
-            &url,
-            HttpVerb::GET,
-            None,
-            None,
-            Some(&mut buffer)
-        ).chain_err(|| "Curl failed")?;
+        response.read_to_end(&mut buffer).chain_err(|| "Failed to read HTTP response")?;
 
         if config.general.output_format == OutputFormat::JSON {
             info("Received response: ");
