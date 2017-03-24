@@ -210,7 +210,7 @@ rat bosun silence set
 
     * [X] Update documentation
 
-* [ ] Refactor auth modules - cf. branch
+* [X] Refactor auth modules - cf. branch
 
 * [ ] Pocket: Move HTTP calls to client mod
 
