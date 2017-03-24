@@ -1,10 +1,11 @@
 use config::{Config, OutputFormat};
-use net::{curl_json, HttpVerb};
 use utils::console::*;
 use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use hyper::Client;
 use serde_json;
+use std::io::Read;
 use std::str;
 use webbrowser;
 
@@ -157,12 +158,15 @@ fn status(config: &Config, details: bool) -> Result<()> {
 }
 
 fn get_centerdevice_status_json() -> Result<String> {
-    let mut buffer = Vec::new();
     let url = "http://status.centerdevice.de/details.json";
-
-    curl_json(url, HttpVerb::GET, None, None, Some(&mut buffer))
+    let mut response = Client::new()
+        .get(url)
+        .send()
         .chain_err(|| ErrorKind::CenterDeviceStatusFailed)?;
-    let json = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
+
+    let mut buffer = Vec::new();
+    response.read_to_end(&mut buffer).chain_err(|| "Failed to read HTTP response")?;
+    let json = str::from_utf8(&buffer).chain_err(|| "Failed to parse JSON")?;
 
     Ok(json.to_string())
 }
