@@ -202,17 +202,17 @@ rat bosun silence set
 
 * [X] Enchance Auths by --browser which opens a browser window.
 
-* [ ] Enhance Pocket
+* [X] Enhance Pocket
 
     * [X] Add --since and --until parameters for search
 
     * [X] Select human outout fields: id, title, url
 
-    * [ ] Update documentation
-
-* [ ] Pocket: Move HTTP calls to client mod
+    * [X] Update documentation
 
 * [ ] Refactor auth modules - cf. branch
+
+* [ ] Pocket: Move HTTP calls to client mod
 
 * [ ] Slack: Move HTTP calls to client mod
 
