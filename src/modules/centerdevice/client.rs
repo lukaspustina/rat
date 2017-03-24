@@ -136,13 +136,13 @@ mod search {
     use std::str;
 
     error_chain! {
-errors {
-HttpSearchCallFailed {
-description("failed to make http search call")
-display("failed to make http search call")
-}
-}
-}
+        errors {
+            HttpSearchCallFailed {
+                description("failed to make http search call")
+                display("failed to make http search call")
+            }
+        }
+    }
 
 
     #[derive(Serialize, Debug)]
@@ -237,13 +237,13 @@ mod upload {
     use std::str;
 
     error_chain! {
-errors {
-HttpUploadCallFailed {
-description("failed to make http upload call")
-display("failed to make http upload call")
-}
-}
-}
+        errors {
+            HttpUploadCallFailed {
+                description("failed to make http upload call")
+                display("failed to make http upload call")
+            }
+        }
+    }
 
     #[derive(Serialize, Debug)]
     struct DocumentMetadata<'a> {
