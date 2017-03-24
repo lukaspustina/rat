@@ -37,10 +37,10 @@ impl<'a> CliOAuth {
 
         let auth_url = format!("{}?{}", self.auth_endpoint, parameters_enc);
         if self.open_browser {
-            msgln(format!("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ..."));
+            msgln("Please authenticate in the web browser window, wait for the redirect, enter the code into the terminal, and then press return ...");
             webbrowser::open(&auth_url).chain_err(|| "Failed to open web browser")?;
         } else {
-            msgln(format!("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ..."));
+            msgln("Please authenticate at the following URL, wait for the redirect, enter the code into the terminal, and then press return ...");
             msgln(format!("\n\t{}\n", auth_url));
         }
         msg("Authentication code: ");
@@ -111,7 +111,7 @@ pub trait CodeWithBasicAuthSchemeResult {
 
 impl CodeWithBasicAuthSchemeResult for Result<CodeWithBasicAuthScheme> {
     fn exchange_for_token<T: Deserialize>(self, config: &Config) -> Result<T> {
-        self.and_then(|code| code.do_exchange_for_token(&config))
+        self.and_then(|code| code.do_exchange_for_token(config))
     }
 }
 
@@ -183,7 +183,7 @@ pub trait CodeWithUrlSchemeResult {
 
 impl CodeWithUrlSchemeResult for Result<CodeWithUrlScheme> {
     fn exchange_for_token<T: Deserialize>(self, config: &Config) -> Result<T> {
-        self.and_then(|code| code.do_exchange_for_token(&config))
+        self.and_then(|code| code.do_exchange_for_token(config))
     }
 }
 
