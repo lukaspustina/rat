@@ -198,6 +198,8 @@ rat bosun silence set
 
     * [X] Use streams
 
+* [X] Checkout mime_multipart 0.5 with my patch included
+
 * [X] Move centerdevice browse-status to status --browse
 
 * [X] Enchance Auths by --browser which opens a browser window.
@@ -212,17 +214,15 @@ rat bosun silence set
 
 * [X] Refactor auth modules - cf. branch
 
-* [ ] Pocket: Move HTTP calls to client mod
+* [X] Slack: Move HTTP calls to client mod
 
-* [ ] Slack: Move HTTP calls to client mod
+* Ongoing
 
-* [X] Checkout mime_multipart 0.5 with my patch included
+    * [ ] Replace curl with hyper
+
+    * [ ] Pocket: Move HTTP calls to client mod
 
 * [ ] Make better use of error_chain by using Foreign errors
-
-* [ ] Replace curl with hyper
-
-* [ ] Move Strings to real ErrorKinds for Curl, etc; check error_chain for links to remove "Curl failed" string Errors.
 
 * [ ] Travis
 
