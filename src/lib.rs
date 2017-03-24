@@ -7,7 +7,7 @@ extern crate crypto;
 extern crate curl;
 #[macro_use] extern crate error_chain;
 extern crate humantime;
-extern crate hyper;
+#[macro_use] extern crate hyper;
 extern crate hyper_native_tls;
 extern crate itertools;
 #[macro_use] extern crate mime;

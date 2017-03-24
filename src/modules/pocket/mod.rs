@@ -5,6 +5,7 @@ use clap::{App, ArgMatches, SubCommand};
 
 pub const NAME: &'static str = "pocket";
 
+mod client;
 mod actions;
 mod auth;
 mod list;
