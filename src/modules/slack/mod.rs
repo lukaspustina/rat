@@ -6,6 +6,7 @@ use clap::{App, ArgMatches, SubCommand};
 pub const NAME: &'static str = "slack";
 
 mod auth;
+mod client;
 
 #[derive(Debug, Deserialize)]
 pub struct SlackConfig {
