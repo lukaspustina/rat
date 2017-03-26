@@ -1,14 +1,15 @@
+use super::client;
+use super::client::send::ActionRequest;
 use config::{Config, OutputFormat};
-use net::{curl, HttpVerb};
 use utils::console::*;
 use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
-use serde_urlencoded;
 use std::str;
 
 pub const NAME_ARCHIVE: &'static str = "archive";
+// There's no typo on readd, because it means re-add -- cf. https://getpocket.com/developer/docs/v3/modify#action_readd
 pub const NAME_READD: &'static str = "readd";
 pub const NAME_FAVORITE: &'static str = "favorite";
 pub const NAME_UNFAVORITE: &'static str = "unfavorite";
@@ -24,31 +25,6 @@ error_chain! {
             description("output failed")
             display("output failed")
        }
-    }
-}
-
-#[allow(non_camel_case_types)]
-#[derive(Serialize, Debug)]
-// TODO: This enum is never used, everything is string based. Why?
-#[allow(dead_code)]
-enum Action {
-    archive,
-    read,
-    favorite,
-    unfavorite ,
-    delete,
-}
-
-#[allow(non_snake_case)]
-#[derive(Serialize, Debug)]
-struct ActionRequest<'a> {
-    action: &'a str,
-    item_id: &'a str,
-}
-
-impl<'a> ActionRequest<'a> {
-    fn new(action: &'a str, item_id: &'a str) -> Self {
-        ActionRequest{ action: action, item_id: item_id }
     }
 }
 
@@ -109,42 +85,15 @@ pub fn call(action: &str, args: Option<&ArgMatches>, config: &Config) -> Result<
     let actions: Vec<ActionRequest> = ids.map(|id| ActionRequest::new(action, id)).collect();
 
     info(format!("Sending {} action for {} article(s) ...", action, actions.len()));
-    let json = send(config, &actions).chain_err(|| ErrorKind::PocketActionFailed(action.to_string()))?;
+    let json = client::send(config, &actions).chain_err(|| ErrorKind::PocketActionFailed(action.to_string()))?;
 
     output(&json, &config.general.output_format)
-}
-
-#[allow(unused_variables)] // for status codes
-fn send(config: &Config, actions: &[ActionRequest]) -> Result<String> {
-    let mut buffer = Vec::new();
-    let actions_json = serde_json::to_string(&actions).chain_err(|| "JSON serialization failed")?;
-    let parameters = &[
-        ("actions", actions_json),
-        ("access_token", config.pocket.access_token.as_ref().unwrap().to_string()),
-        ("consumer_key", config.pocket.consumer_key.to_string())
-    ];
-    let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
-
-    let url = format!("https://getpocket.com/v3/send?{}", parameters_enc);
-
-    // TODO: Only continue if 200
-    let response_status_code = curl(
-        &url,
-        HttpVerb::GET,
-        None,
-        None,
-        Some(&mut buffer)
-    ).chain_err(|| "Curl failed")?;
-
-    let response_str = str::from_utf8(&buffer).chain_err(|| "Data copying failed.")?;
-
-    Ok(response_str.to_string())
 }
 
 fn output(json: &str, format: &OutputFormat) -> Result<()> {
     match *format {
         OutputFormat::HUMAN => output_human(json),
-        OutputFormat::JSON  => output::as_json(json).chain_err(|| ErrorKind::OutputFailed),
+        OutputFormat::JSON => output::as_json(json).chain_err(|| ErrorKind::OutputFailed),
     }
 }
 
