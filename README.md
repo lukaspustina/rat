@@ -263,9 +263,11 @@ rat bosun silence set
 
 * [ ] Travis
 
-    * [ ] packagecloud.io
+    * [X] packagecloud.io
 
     * [ ] Add Badges for Travis to Cargo.toml
+
+* [ ] Wait for new select release and then let Travis publish to crates.io
 
 * [ ] Tests
 
@@ -275,6 +277,13 @@ rat bosun silence set
 
 * [ ] Move to future based clients -- cf. http://asquera.de/blog/2017-03-01/the-future-with-futures/
 
+-- Before first 1.0 release
+
+* [ ] Documentation
+
+    * [ ] Add documentation generation to .travis
+
+* [ ] Cleanup of Readme; esp. Todos
 
 ----
 
