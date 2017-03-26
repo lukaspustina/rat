@@ -1,5 +1,7 @@
 # RAT - the Rest Api Tool ![Rat](images/rat.png)
 
+[![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/rat.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/rat) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE)
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
@@ -265,7 +267,7 @@ rat bosun silence set
 
     * [X] packagecloud.io
 
-    * [ ] Add Badges for Travis to Cargo.toml
+    * [X] Add Badges for Travis in Cargo.toml and Readme
 
 * [ ] Wait for new select release and then let Travis publish to crates.io
 

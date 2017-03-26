@@ -6,6 +6,7 @@ description = "REST API tool -- qeuery various REST APIs comfortably"
 repository = "https://github.com/lukaspustina/rat "
 readme = "README.md"
 license = "MIT"
+license-file = "LICENSE"
 keywords = ["REST", "API", "CenterDevice", "Pocket", "ElasticSearch", "Slack"]
 include = [
   "README.md",
@@ -13,6 +14,9 @@ include = [
   "**/*.rs",
   "Cargo.toml",
 ]
+
+[badges]
+travis-ci = { repository = "https://travis-ci.org/lukaspustina/rat", branch = "master" }
 
 [[bin]]
 name = "rat"
