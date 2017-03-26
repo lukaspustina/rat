@@ -1,6 +1,6 @@
 [package]
 name = "rat"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Lukas Pustina <lukas@pustina.net>"]
 description = "REST API tool -- qeuery various REST APIs comfortably"
 repository = "https://github.com/lukaspustina/rat "
