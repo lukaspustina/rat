@@ -1,4 +1,6 @@
-# RAT - the Rest Api Tool ![Rat](images/rat.png)
+![Rat](images/rat.png)
+
+## RAT - the Rest Api Tool
 
 [![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/rat.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/rat) [![Windows Build status](https://img.shields.io/appveyor/ci/lukaspustina/rat.svg?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/lukaspustina/rat/branch/master) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE)
 
@@ -38,6 +40,7 @@
   - [Pocket](#pocket-1)
   - [Rust](#rust)
 - [Crates](#crates)
+- [Credits](#credits)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -361,4 +364,8 @@ rat bosun silence set
     * [Quickcheck](https://github.com/BurntSushi/quickcheck)
 
     * [Mocks](https://github.com/kriomant/mockers)
+
+# Credits
+
+* Rat icon is (C) by [Eduardo Gonçalves Costa](https://thenounproject.com/geceduardo) under [CC BY 3.0 US](https://creativecommons.org/licenses/by/3.0/us/).
 
