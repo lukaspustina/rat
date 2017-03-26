@@ -62,6 +62,9 @@ pub fn build_sub_cli() -> App<'static, 'static> {
             .possible_values(&["id", "title", "url", "t_added"])
             .default_value("id,title,url,t_added")
             .help("Select human output field; default all"))
+        .arg(Arg::with_name("search")
+            .index(1)
+            .help("Select articles with search term in title or url"))
 }
 
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
