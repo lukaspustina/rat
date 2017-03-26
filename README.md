@@ -10,10 +10,10 @@
 - [Usage](#usage)
   - [General](#general)
   - [CenterDevice](#centerdevice)
-      - [Authenticate rat](#authenticate-rat)
-      - [Download document](#download-document)
-      - [Search document](#search-document)
-      - [Upload document](#upload-document)
+    - [Authenticate rat](#authenticate-rat)
+    - [Download document](#download-document)
+    - [Search document](#search-document)
+    - [Upload document](#upload-document)
   - [Pocket](#pocket)
     - [Authentication](#authentication)
       - [Create a consumer key](#create-a-consumer-key)
@@ -51,7 +51,6 @@ rat centerdevice upload
 ```bash
 rat pocket auth
 rat pocket list
-rat pocket search
 rat pocket archive
 rat pocket readd
 rat pocket favorite
@@ -127,9 +126,13 @@ Create a [new application](https://getpocket.com/developer/apps/new) and add the
 
 `rat pocket archive|readd|favorite|unfavorite|delete <article ids>...`
 
-### List
+### List and Search
 
-List all
+Search in title and URL of all articles ...
+
+* the word rust: `rat pocket list rust`
+
+List all ...
 
 * unread articeles: `rat pocket list`
 
@@ -252,13 +255,11 @@ rat bosun silence set
 
 * [X] Slack: Move HTTP calls to client mod
 
-* Ongoing
+* [X] Replace curl with hyper
 
-    * [ ] Replace curl with hyper
+* [X] Pocket: Move HTTP calls to client mod
 
-    * [ ] Pocket: Move HTTP calls to client mod
-
-* [ ] Make better use of error_chain by using Foreign errors
+* [X] Replace Pocket list and search by search that optionally takes a search term
 
 * [ ] Travis
 
@@ -267,6 +268,8 @@ rat bosun silence set
     * [ ] Add Badges for Travis to Cargo.toml
 
 * [ ] Tests
+
+* [ ] Make better use of error_chain by using Foreign errors
 
 * [ ] Run Clippy once cargo in nightly works again -- cf. http://asquera.de/blog/2017-03-03/setting-up-a-rust-devenv/
 
