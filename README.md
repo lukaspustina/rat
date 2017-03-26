@@ -8,7 +8,10 @@
 
 - [Available Clients](#available-clients)
 - [Installation](#installation)
-  - [macOS with Homebrew](#macos-with-homebrew)
+  - [macOS](#macos)
+  - [Ubuntu](#ubuntu)
+  - [Windows](#windows)
+  - [From Source](#from-source)
 - [Usage](#usage)
   - [General](#general)
   - [CenterDevice](#centerdevice)
@@ -21,7 +24,7 @@
       - [Create a consumer key](#create-a-consumer-key)
       - [Authenticate rat](#authenticate-rat-1)
     - [Archive | Readd | Favorite | Unfavorite | Delete](#archive--readd--favorite--unfavorite--delete)
-    - [List](#list)
+    - [List and Search](#list-and-search)
       - [Advanced listing](#advanced-listing)
   - [Slack](#slack)
     - [Authentication](#authentication-1)
@@ -72,13 +75,17 @@ rat stocks
 
 # Installation
 
-## macOS with Homebrew
+## macOS
+
+Use can use [Homebrew](https://brew.sh) to install rat on your system.
 
 ```bash
 brew install lukaspustina/os/rat
 ```
 
 ## Ubuntu
+
+Pleae add my [PackageCloud] open source repository and install rat via apt.
 
 ```bash
 curl -s https://packagecloud.io/install/repositories/lukaspustina/opensource/script.deb.sh | sudo bash
@@ -87,7 +94,15 @@ sudo apt-get install rat
 
 ## Windows
 
-rat is automatically build on Windows via AppVeyor to ensure is compiles and runs fine but binaries are currently not provides. Please compile it yourself by running `cargo install rat`.
+rat is automatically build on Windows via AppVeyor to ensure is compiles and runs fine but binaries are currently not provided. Please compile it from source.
+
+## From Source
+
+Please install Rust via [rustup](https://www.rustup.rs) and then run
+
+```bash
+cargo install rat
+```
 
 
 # Usage
