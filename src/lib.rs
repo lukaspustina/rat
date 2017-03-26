@@ -4,7 +4,6 @@ extern crate base64;
 extern crate chrono;
 extern crate clap;
 extern crate crypto;
-extern crate curl;
 #[macro_use] extern crate error_chain;
 extern crate humantime;
 #[macro_use] extern crate hyper;
