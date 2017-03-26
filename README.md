@@ -1,6 +1,6 @@
 # RAT - the Rest Api Tool ![Rat](images/rat.png)
 
-[![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/rat.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/rat) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE)
+[![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/rat.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/rat) [![Windows Build status](https://img.shields.io/appveyor/ci/lukaspustina/rat.svg?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/lukaspustina/rat/branch/master) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -84,6 +84,10 @@ brew install lukaspustina/os/rat
 curl -s https://packagecloud.io/install/repositories/lukaspustina/opensource/script.deb.sh | sudo bash
 sudo apt-get install rat
 ```
+
+## Windows
+
+rat is automatically build on Windows via AppVeyor to ensure is compiles and runs fine but binaries are currently not provides. Please compile it yourself by running `cargo install rat`.
 
 
 # Usage

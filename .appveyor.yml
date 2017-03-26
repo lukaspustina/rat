@@ -1,6 +1,5 @@
 ---
 version: build-{build}
-skip_non_tags: true
 environment:
   matrix:
   - TARGET: x86_64-pc-windows-msvc
@@ -20,7 +19,8 @@ install:
   - cargo -V
 build: off
 test_script:
-  # Compile and check if the binary works
+  # Compile, run test, check if the binary works, build release binaries
+  - cargo test
+  - cargo run -- --help
   - cargo build --release
-  - cargo run --release -- --help
 

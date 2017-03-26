@@ -17,6 +17,7 @@ include = [
 
 [badges]
 travis-ci = { repository = "https://travis-ci.org/lukaspustina/rat", branch = "master" }
+appveyor = { repository = "https://ci.appveyor.com/project/lukaspustina/rat", branch = "master" }
 
 [[bin]]
 name = "rat"
