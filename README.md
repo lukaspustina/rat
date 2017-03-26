@@ -78,6 +78,13 @@ rat stocks
 brew install lukaspustina/os/rat
 ```
 
+## Ubuntu
+
+```bash
+curl -s https://packagecloud.io/install/repositories/lukaspustina/opensource/script.deb.sh | sudo bash
+sudo apt-get install rat
+```
+
 
 # Usage
 
