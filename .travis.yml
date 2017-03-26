@@ -16,7 +16,7 @@ matrix:
   - rust: nightly
 before_deploy:
 - cd /home/travis/build/lukaspustina/rat; cargo build --release
-- cd /home/travis/build/lukaspustina/distribution/deb; BIN_DIR=../../rat/target/release
+- cd /home/travis/build/lukaspustina/rat/distribution/deb; BIN_DIR=../../target/release
   ARCH=amd64 VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
 deploy:
   provider: packagecloud
