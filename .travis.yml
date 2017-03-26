@@ -1,0 +1,39 @@
+language: rust
+rust:
+- stable
+- beta
+- nightly
+branches:
+  only:
+  - master
+  - travis-ci
+  - "/^v.*$/"
+os:
+- linux
+- osx
+matrix:
+  allow_failures:
+  - rust: nightly
+before_deploy:
+- cd /home/travis/build/lukaspustina/rat; cargo build --release
+- cd /home/travis/build/lukaspustina/distribution/deb; BIN_DIR=../../rat/target/release ARCH=amd64 VERSION=$TRAVIS_TAG TAG=$TRAVIS_TAG DIST=trusty make package
+deploy:
+  provider: packagecloud
+  username: lukaspustina
+  token:
+    secure: nenm909I+AdhcqngfvD6AWMTuS507MJZIzeA3C1oC17zT0bHXppN6PSnpIQhv9hgjhTdgwYZntU4xRsOqj3E1pFi1QChUsXuRhdxvm5RfTiKp3d5PSKTUqnMDs26ZU+z4xKV/YVeX/rJLUN+qndvI8oiIWRg1dZxSQ/XQQZYqTOiRQ9KxnyDNC+P23EtLOa/X7+X7hPI/0oEKVbXVHT9txLUx2OAFymHG1j93N+py39y0L0d9BHJHi28Hd6gFL93PBDJ4n7bjA+PWXSPflwxOQKxk1CjR6JbF1csAgjUaUq1mJox0IYjThpHRYEN9lgmR2KXJgd6t+xbibpzCxOxRztft+pzcUJo2txTcWR3+InmpTmv+X6TcvMiRcPU29cA2u5F/H9SajBcGw25z8W9Apv4ESLdZ0cunTVOcdCbUijwz67yL4zZwhJ0LP/8MvQalySWyzL+El64jagw3ge578vrk9YCO5krM6OVqFxE8HdXRQV5YTK8104oyBKpeZG+/6gcomDErtv4FmRSlcb/Ixb0sXvCwc07IlUELqnXP5VEYeRHbmGpCWHgdg2BJP9Vye8w7jOD2XFF68gn4cqIfV0YfcIxw2U3NFeacXYiSwVuc6LJnlbYq9vixuLxHk5SMKSb6cWJF83wl/Fh3sym18MeiQWJ+oPoBCiXAnsTmso=
+  repository: opensource
+  dist: ubuntu/trusty
+  package_glob: "**/*.deb"
+  skip_cleanup: true
+  on:
+    tags: true
+    condition:
+    - "$TRAVIS_OS_NAME == linux"
+    - "$TRAVIS_RUST_VERSION == stable"
+after_deploy:
+- cd /home/travis/build/lukaspustina/rat; cargo publish --token ${CRATES_IO_TOKEN}
+env:
+  global:
+  - secure: QIuMZyJm4gxKGoXPcd8xb6DWOwHWXOnLRjddM1p/X1byatS2+37qMVJ3c4jsj8vCh2XC+0t1v+Vj61/+VdO4C7M6uPY7fcBMPwNdLzmkrJqyTtDGMSzM18FrJa1iQ3CPyD2JPbb568y3/lmKxmwBxiLBPX4d5GflrJF1leOSqs6Y8LdCYzQe8b+qyTJt5b2cscp6/5td7ObmIaxnbPjtAMdW99t09ljhz4OKtBCsQCM+VeiOT3QiNTO1rsM1yZbC8Qv5B84yhYiCO2QGM56SHBlQb8htpaVePu7RKeYU+SyE+EPR3xjjMcR0mlm6WkAetokNoK55gnb1Cd0KYUrhyAWMvJxvYSkFI5NMGUIgLm+grtKe/oyr5A9cM3SvAxAdKXjjl1CtLEYeoHotgH1pdsdSBtSx7n2W9ozMd2JjVGKu8+DlhW4lY2fgtXiKFqojSy9aislB4UDOE3yA/Audsq8C8pavUNwaS1H4I5bfJ98liv8ibgL5jl25OdbSzqc9crelIA3XWglj8Hc2jHdLx2QpHG4NdR0O/WX7/Ccw7wq1Z+GHCfdz86NUEOypnr+MTxPV7R1tsQBH8DAq7itx24EqNZkDoULmPiflDdc6o48Ns0GKBftdMSZ/YU+RGbVuybHieXGlnr/1gYzUMP30x2QIVvO19sTDv8BhXQOBV9M=
+  - secure: UPnfo6hJKDnd+XuqIvCfj374N3PuBxxG3rK5NoEOnzBWcDxrZwkBxVL+IqJtwDl/OCbZlD1eNDHqdPkSgO0ph+6+tpnCe1KMU2vwwQAG9yCmysmomI7cGcCg8oCvrg76ADlE/UVU0HXIWZgCmlt77KK6gVpagfEiOYUm/ScBJPmJUs0JTgG3RjGRaU//FIJGAwJInSIMpoPHC5XfKdgEEj9426XsbWQcoFwk+InRN6qlnr1hORA7KFPhBkjcnRn1ky/IFYXqjgNwZgGfYyK37idESPZVRd+u+Q8CVHSXrKQRwGGsIb+RZsoigt3AcaAR6ttVssGIlsvLS5VUI3mkjLnQodIoY7EXPqpRAfGTL2TprVcler7NeSVv0FxfxDaAeOGwDDjS5pZ/aLLMydY4eAlCVU5CApNjO7cYHBSGIkIw6I4woCeqNhMPd+rZ7i7AOJds4X26MoFPjNQzOmBkNDYV0X6SjCmMVS2ih2KufVv5QhuZxDg5uJPTSQXjGmQ4YTIdJ+i3Rm3mtJQsN/uXKdI/E/h5o93X/CmaQdpGSjNms7O9r3TMshP9b0YwmNJk4P40BgKaTi/AdTqTplu7+gpDLfrKW1w57gCBiQ8IvMd5fajTQDPrQcebqRaa0EMnGmZnyREsxdsZYGfzgWzfeTRSgtcEAtqvu1z88jiR0SE=
