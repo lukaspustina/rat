@@ -77,7 +77,7 @@ rat stocks
 
 ## macOS
 
-Use can use [Homebrew](https://brew.sh) to install rat on your system.
+Please use [Homebrew](https://brew.sh) to install rat on your system.
 
 ```bash
 brew install lukaspustina/os/rat
