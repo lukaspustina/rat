@@ -36,7 +36,7 @@ mime = "0.2.2"
 mime_guess = "1.8"
 mime_multipart = "0.5"
 rust-crypto = "0.2"
-select = { git = "https://github.com/utkarshkukreti/select.rs/", rev = "7fedd1fe537e3fcfa882a41b1590b55460418ddd" }
+select = "0.4.0"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
