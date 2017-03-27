@@ -32,6 +32,8 @@ deploy:
     condition:
     - "$TRAVIS_OS_NAME == linux"
     - "$TRAVIS_RUST_VERSION == stable"
+after_deploy:
+- cd /home/travis/build/lukaspustina/rat; cargo publish --token ${CRATES_IO_TOKEN}
 env:
   global:
     secure: UY05iji5GgQWuktTBt9K44z/v7cmMiT4tbmNKWqLy9RIpFLRe6+0maajuATqy1oL3i0e8pFORs/SxZSLP+6j+BkIhGNoyl2UA7sZVIIbrj/9J5NwenpDpidunHsObln8aRlgWfmRcdnyvynVjchKBHKZqlkBMYc1QA680gJ6bBe9hnjRSlKu6+5Da3IXpkFEBL02Ln4u8F6huU/Uu31AtYJNUzXkUZr/vpxcTtXMmngSA1yRL6KJWq9iC2oGnIHIJZREkXs7ceO512vOKp2hx5+Z0mA5av2+eL9K3+wsmTybRKuTaCc+LZqic9rXGTj5FHOmwD+eYOeF58X4hCvmY2rXHOP8s3q78+ZiQMP2K5s1qLDnxG4Ng104pRa+A9tYUsUbBJd+PCOMFvK7Ssj8lV1DqV/koCDPAfV6lbaEZ739qJVoA3ummWFxg8X0x6Bohvp/mRiM0p2orplOriyotPfiFTct0Cgj/txtlfl4Dvjxs2UBFFgwC7Ll7TkjvPHNW5CS9BCu4RwXcUI422mwvNsBk2IJHNN7Lu3lyHrTMgJ9Zhg9oOGl+UEWTQRXvK8ZThxsgJ9k4phf8qdJsiA3pMM3nnalPH3AEq24NwenH8XoSQf7jk2fZ1cXI1nTuPUUhKHwlbvNICXwEUBBX7th0vz1fqpVQLPQCrFF9TPxTBI=
