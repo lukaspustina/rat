@@ -131,6 +131,7 @@ mod search {
     use hyper::header::{ContentType, Authorization, Bearer, Accept, qitem};
     use hyper::net::HttpsConnector;
     use hyper_native_tls::NativeTlsClient;
+    use serde::Serialize;
     use serde_json;
     use std::io::Read;
     use std::str;
@@ -155,6 +156,7 @@ mod search {
     struct Params<'a> {
         query: Query<'a>,
         filter: Filter<'a>,
+        #[serde(skip_serializing_if = "Vec::is_empty")] named: Vec<Named<'a>>,
     }
 
     #[derive(Serialize, Debug)]
@@ -168,11 +170,24 @@ mod search {
         #[serde(skip_serializing_if = "Option::is_none")] tags: Option<Vec<&'a str>>,
     }
 
+    #[derive(Serialize, Debug)]
+    struct Named<'a> {
+        name: &'a str,
+        params: Include,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Include {
+        include: bool
+    }
+
     impl<'a> Search<'a> {
         pub fn new(filenames: Option<Vec<&'a str>>, tags: Option<Vec<&'a str>>, fulltext: Option<&'a str>) -> Self {
             let filter = Filter { filenames: filenames, tags: tags };
             let query = Query { text: fulltext };
-            let params = Params { query: query, filter: filter };
+            let includes = Include{ include: true };
+            let named = vec![Named { name: "public-collections", params: includes }];
+            let params = Params { query: query, filter: filter, named: named};
 
             Search { action: "search", params: params }
         }
