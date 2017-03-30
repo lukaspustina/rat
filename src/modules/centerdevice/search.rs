@@ -40,6 +40,10 @@ pub fn build_sub_cli() -> App<'static, 'static> {
             .takes_value(true)
             .multiple(true)
             .help("Add tag to search"))
+        .arg(Arg::with_name("public_collections")
+            .long("public-collections")
+            .short("p")
+            .help("Includes public collections in search"))
         .arg(Arg::with_name("fulltext")
             .index(1)
             .help("Add fulltext to search"))
@@ -50,11 +54,19 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
     let filenames: Option<Vec<&str>> = args.values_of("filename").map(|c| c.collect());
     let tags: Option<Vec<&str>> = args.values_of("tags").map(|c| c.collect());
+    let named = if args.is_present("public_collections") {
+        client::search::NamedSearches::PublicCollections
+    } else {
+        client::search::NamedSearches::None
+    };
     let fulltext = args.value_of("fulltext");
 
     info("Searching for documents ...");
+    if named == client::search::NamedSearches::PublicCollections {
+        info("Including public collections");
+    }
     let json = client::search_documents(
-        config.centerdevice.access_token.as_ref().unwrap(), filenames, tags, fulltext)
+        config.centerdevice.access_token.as_ref().unwrap(), filenames, tags, fulltext, named)
         .chain_err(|| ErrorKind::CenterDeviceSearchFailed)?;
 
     output(&json, &config.general.output_format)
