@@ -124,13 +124,14 @@ mod download {
     }
 }
 
-mod search {
+pub mod search {
     use utils::console::*;
 
     use hyper::Client;
     use hyper::header::{ContentType, Authorization, Bearer, Accept, qitem};
     use hyper::net::HttpsConnector;
     use hyper_native_tls::NativeTlsClient;
+    use serde::Serialize;
     use serde_json;
     use std::io::Read;
     use std::str;
@@ -144,17 +145,22 @@ mod search {
         }
     }
 
-
+    #[derive(PartialEq, Debug)]
+    pub enum NamedSearches {
+        None,
+        PublicCollections
+    }
     #[derive(Serialize, Debug)]
-    struct Search<'a> {
+    struct Search<'a, T: Serialize> {
         action: &'a str,
-        params: Params<'a>,
+        params: Params<'a, T>,
     }
 
     #[derive(Serialize, Debug)]
-    struct Params<'a> {
+    struct Params<'a, T: Serialize> {
         query: Query<'a>,
         filter: Filter<'a>,
+        #[serde(skip_serializing_if = "Option::is_none")] named: Option<Vec<Named<'a, T>>>,
     }
 
     #[derive(Serialize, Debug)]
@@ -168,11 +174,27 @@ mod search {
         #[serde(skip_serializing_if = "Option::is_none")] tags: Option<Vec<&'a str>>,
     }
 
-    impl<'a> Search<'a> {
-        pub fn new(filenames: Option<Vec<&'a str>>, tags: Option<Vec<&'a str>>, fulltext: Option<&'a str>) -> Self {
+    #[derive(Serialize, Debug)]
+    struct Named<'a, T: Serialize>{
+        name: &'a str,
+        params: T,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Include {
+        include: bool
+    }
+
+    impl<'a, T: Serialize> Search<'a, T> {
+        pub fn new(
+            filenames: Option<Vec<&'a str>>,
+            tags: Option<Vec<&'a str>>,
+            fulltext: Option<&'a str>,
+            named: Option<Vec<Named<'a, T>>>) -> Self {
+
             let filter = Filter { filenames: filenames, tags: tags };
             let query = Query { text: fulltext };
-            let params = Params { query: query, filter: filter };
+            let params = Params { query: query, filter: filter, named: named};
 
             Search { action: "search", params: params }
         }
@@ -182,8 +204,10 @@ mod search {
         access_token: &str,
         filenames: Option<Vec<&str>>,
         tags: Option<Vec<&str>>,
-        fulltext: Option<&str>) -> Result<String> {
-        do_search_documents(access_token, filenames, tags, fulltext)
+        fulltext: Option<&str>,
+        named_searches: NamedSearches) -> Result<String> {
+
+        do_search_documents(access_token, filenames, tags, fulltext, named_searches)
             .chain_err(|| ErrorKind::HttpSearchCallFailed)
     }
 
@@ -191,8 +215,18 @@ mod search {
         access_token: &str,
         filenames: Option<Vec<&str>>,
         tags: Option<Vec<&str>>,
-        fulltext: Option<&str>) -> Result<String> {
-        let search = Search::new(filenames, tags, fulltext);
+        fulltext: Option<&str>,
+        named_searches: NamedSearches) -> Result<String> {
+
+        let named: Option<Vec<Named<Include>>> = match named_searches {
+            NamedSearches::None => None,
+            NamedSearches::PublicCollections => {
+                let includes = Include{ include: true };
+                let named = vec![Named { name: "public-collections", params: includes }];
+                Some(named)
+            }
+        };
+        let search = Search::new(filenames, tags, fulltext, named);
         let search_json = serde_json::to_string(&search).chain_err(|| "JSON serialization failed")?;
 
         verboseln(format!("search = '{:?}'", search_json));
