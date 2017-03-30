@@ -6,7 +6,6 @@ description = "REST API tool -- qeuery various REST APIs comfortably"
 repository = "https://github.com/lukaspustina/rat "
 readme = "README.md"
 license = "MIT"
-license-file = "LICENSE"
 keywords = ["REST", "API", "CenterDevice", "Pocket", "ElasticSearch", "Slack"]
 include = [
   "README.md",
