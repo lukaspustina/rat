@@ -136,6 +136,8 @@ The message output levels configure how talkative rat is during execution. The q
 
 * Search again, but now post-process JSON response with `jq`: `rat --output json --quiet centerdevice search -f README.md -t documentation "the Rest Api Tool" | jq .`
 
+* Expand search to public collections: `... --public-collections`
+
 ### Upload document
 
 `rat centerdevice upload README.md -t documentation -t rat`
