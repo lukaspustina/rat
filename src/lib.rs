@@ -21,6 +21,8 @@ extern crate term_painter;
 extern crate toml;
 extern crate webbrowser;
 
+#[cfg(test)] #[macro_use] extern crate pretty_assertions;
+
 pub mod config;
 pub mod errors;
 pub mod modules;
