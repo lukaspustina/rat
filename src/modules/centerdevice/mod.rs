@@ -7,6 +7,7 @@ pub const NAME: &'static str = "centerdevice";
 
 mod auth;
 mod client;
+mod collections;
 mod download;
 mod search;
 mod status;
@@ -24,6 +25,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
     SubCommand::with_name(NAME)
         .about("CenterDevice status etc.")
         .subcommand(auth::build_sub_cli())
+        .subcommand(collections::build_sub_cli())
         .subcommand(download::build_sub_cli())
         .subcommand(search::build_sub_cli())
         .subcommand(status::build_sub_cli())
@@ -35,6 +37,8 @@ pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let subcommand_name = subcommand.subcommand_name().ok_or_else(|| ErrorKind::NoSubcommandSpecified(NAME.to_string()))?;
     match subcommand_name {
         auth::NAME => auth::call(subcommand.subcommand_matches(subcommand_name), config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        collections::NAME => collections::call(subcommand.subcommand_matches(subcommand_name), config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         download::NAME => download::call(subcommand.subcommand_matches(subcommand_name), config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),

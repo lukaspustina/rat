@@ -21,7 +21,7 @@ pub struct CliOAuth {
     pub client_id: String,
     pub client_secret: String,
     pub auth_endpoint: String,
-    pub token_endpoint: String,
+pub token_endpoint: String,
     pub redirect_uri: String,
     pub open_browser: bool,
 }

@@ -1,3 +1,4 @@
+pub use self::collections::search_collections;
 pub use self::download::download_document;
 pub use self::search::search_documents;
 pub use self::upload::upload_document;
@@ -17,6 +18,99 @@ fn prepare_request<'a, 'b>(client: &'a Client, method: Method, url: &'b str, tok
     }.header(Authorization(Bearer { token: token }));
 
     Ok(request)
+}
+
+pub mod collections {
+    use super::prepare_request;
+    use net::http::tls_client;
+
+    use utils::console::*;
+
+    use hyper::method::Method;
+    use serde_json;
+    use serde_urlencoded;
+    use std::io::Read;
+    use std::str;
+
+    error_chain! {
+        errors {
+            HttpCollectionCallFailed {
+                description("failed to make http collection call")
+                display("failed to make http collection call")
+            }
+        }
+    }
+
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct CollectionsResult {
+        pub collections: Vec<Collection>,
+    }
+
+    impl CollectionsResult {
+        pub fn filter(self, regex: &str) -> CollectionsResult {
+            let regex = regex;
+            let collections = self.collections.into_iter().filter(|c| c.name.contains(regex)).collect();
+            CollectionsResult { collections: collections }
+        }
+    }
+
+    #[derive(Deserialize, Serialize, Debug)]
+    pub struct Collection {
+        pub id: String,
+        pub public: bool,
+        pub name: String,
+    }
+
+    pub fn search_collections(
+        access_token: &str,
+        name: Option<&str>,
+        include_public: bool,
+        filter: Option<&str>
+    ) -> Result<String> {
+
+        let json = do_search_collections(access_token, name, include_public)
+            .chain_err(|| ErrorKind::HttpCollectionCallFailed);
+        if filter.is_none() {
+            return json;
+        }
+
+        let collections_result: CollectionsResult = serde_json::from_str(&json.unwrap())
+            .chain_err(|| "Failed to parse JSON")?;
+        let collections_result = collections_result.filter(filter.unwrap());
+
+        let json = serde_json::to_string(&collections_result).chain_err(|| "Failed to serialize JSON")?;
+        Ok(json)
+
+    }
+
+    fn do_search_collections(
+        access_token: &str,
+        name: Option<&str>,
+        include_public: bool
+    ) -> Result<String> {
+        let mut parameters = vec![
+            ("include-public", format!("{}", include_public)),
+        ];
+        if name.is_some() {
+            parameters.push(("name", name.unwrap().to_string()))
+        }
+        let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
+        let url = format!("https://api.centerdevice.de/v2/collections?{}", parameters_enc);
+
+        verboseln(format!("collections search = {}", url));
+
+        let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
+        let request = prepare_request(&client, Method::Get, &url, access_token.to_string())
+            .chain_err(|| "Failed to create CenterDevice client")?;
+
+        let mut response = request.send().chain_err(|| "Failed to finish http request")?;
+
+        let mut body = Vec::new();
+        response.read_to_end(&mut body).chain_err(|| "Failed to read server response")?;
+        let response_body = String::from_utf8_lossy(&body).to_string();
+
+        Ok(response_body)
+    }
 }
 
 mod download {
@@ -65,7 +159,6 @@ mod download {
         filename: Option<&str>,
         document_id: &str
     ) -> Result<()> {
-
         let url = format!("https://api.centerdevice.de/v2/document/{}", document_id);
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
         let request = prepare_request(&client, Method::Get, &url, access_token.to_string())
