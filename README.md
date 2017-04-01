@@ -306,7 +306,7 @@ rat bosun silence set
 
     * [X] Refactor client lib
 
-    * [ ] search for collections
+    * [X] search for collections
 
     * [X] upload to collection
 
@@ -351,9 +351,7 @@ rat bosun silence set
 
 # Crates
 
-* [curl-rust](https://github.com/alexcrichton/curl-rust/commits/master)
-
-* [oauth2](https://github.com/alexcrichton/oauth2-rs/blob/master/src/lib.rs)
+* [elastic tabstops](https://github.com/BurntSushi/tabwriter)
 
 * [serde](https://serde.rs)
 
