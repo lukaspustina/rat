@@ -7,7 +7,9 @@ use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
+use std::io::Write;
 use std::str;
+use tabwriter::TabWriter;
 
 pub const NAME: &'static str = "collections";
 
@@ -72,14 +74,18 @@ fn output_human(json: &str) -> Result<()> {
     let result: CollectionsResult = serde_json::from_str(json).chain_err(|| "JSON parsing failed")?;
     msgln(format!("Found {} collection(s) matching the search parameters:", result.collections.len()));
 
+    let mut tw = TabWriter::new(vec![]);
     for c in result.collections {
         let visibility = if c.public {
             "public"
         } else {
             "private"
         };
-        msgln(format!("* {}:\t[{}]\t'{}'", c.id, visibility, c.name));
+        let _ = write!(&mut tw, "* {}:\t'{}'\t[{}]\n", c.id, c.name, visibility);
     }
+    tw.flush().unwrap();//.chain_err("|| Failed to create output table");
+    let written = String::from_utf8(tw.into_inner().unwrap()).unwrap();
+    msgln(written);
 
     Ok(())
 }

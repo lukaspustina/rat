@@ -17,6 +17,7 @@ extern crate select;
 extern crate serde;
 extern crate serde_json;
 extern crate serde_urlencoded;
+extern crate tabwriter;
 extern crate term_painter;
 extern crate toml;
 extern crate webbrowser;
