@@ -1,10 +1,8 @@
 use super::StockPrice;
+use net::http::tls_client;
 use utils::console::*;
 
-use hyper::Client;
 use hyper::header::Connection;
-use hyper::net::HttpsConnector;
-use hyper_native_tls::NativeTlsClient;
 use select::document::Document;
 use select::predicate::{Predicate, Attr, Class, Name};
 use serde_urlencoded;
@@ -38,9 +36,7 @@ pub fn scrape_stock_price(search: String) -> Result<StockPrice> {
 }
 
 fn get_stock_page(url: &str) -> Result<Vec<u8>> {
-    let ssl = NativeTlsClient::new().chain_err(|| "Could not create TLS client")?;
-    let connector = HttpsConnector::new(ssl);
-    let client = Client::with_connector(connector);
+    let client = tls_client().chain_err(|| "Could not create TLS client")?;
     info("Sending search request ...");
     let mut response = client.get(url).header(Connection::close()).send()
         .chain_err(|| "Could not send request")?;

@@ -1,11 +1,9 @@
 use config::{Config, OutputFormat};
+use net::http::tls_client;
 use utils::console::*;
 
 use base64;
-use hyper::Client;
 use hyper::header::{ContentType, Authorization, Basic};
-use hyper::net::HttpsConnector;
-use hyper_native_tls::NativeTlsClient;
 use serde::Deserialize;
 use serde_json;
 use serde_urlencoded;
@@ -135,9 +133,7 @@ impl CodeWithBasicAuthScheme {
         let input = format!("grant_type={}&redirect_uri={}&code={}",
                             grant_type, self.code.redirect_uri, self.code.code);
 
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
+        let client = tls_client().chain_err(|| "Could not create TLS client")?;
         let mut response = client
             .post(&self.code.token_endpoint)
             .header(Authorization(Basic { username: self.code.client_id, password: Some(self.code.client_secret) }))
@@ -205,9 +201,7 @@ impl CodeWithUrlScheme {
         let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
         let url = format!("https://slack.com/api/oauth.access?{}", parameters_enc);
 
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
+        let client = tls_client().chain_err(|| "Could not create TLS client")?;
         let mut response = client
             .get(&url)
             .send()

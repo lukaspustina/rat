@@ -2,14 +2,31 @@ pub use self::download::download_document;
 pub use self::search::search_documents;
 pub use self::upload::upload_document;
 
+use hyper::Client;
+use hyper::method::Method;
+use hyper::client::RequestBuilder;
+use hyper::header::{Authorization, Bearer};
+
+error_chain! {}
+
+fn prepare_request<'a, 'b>(client: &'a Client, method: Method, url: &'b str, token: String) -> Result<RequestBuilder<'a>> {
+    let request = match method {
+        Method::Get => client.get(url),
+        Method::Post => client.post(url),
+        _ => unimplemented!(),
+    }.header(Authorization(Bearer { token: token }));
+
+    Ok(request)
+}
+
 mod download {
+    use super::prepare_request;
+    use net::http::tls_client;
     use utils::console::*;
 
-    use hyper::Client;
     use hyper::client::Response;
     use hyper::header::{ContentType, ContentDisposition, ContentLength, DispositionParam, Authorization, Bearer};
-    use hyper::net::HttpsConnector;
-    use hyper_native_tls::NativeTlsClient;
+    use hyper::method::Method;
     use std::fs::File;
     use std::io;
     use std::io::{Read, Write};
@@ -46,13 +63,13 @@ mod download {
     fn do_download_document(
         access_token: &str,
         filename: Option<&str>,
-        document_id: &str) -> Result<()> {
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
+        document_id: &str
+    ) -> Result<()> {
 
         let url = format!("https://api.centerdevice.de/v2/document/{}", document_id);
-        let request = client.get(&url)
+        let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
+        let request = prepare_request(&client, Method::Get, &url, access_token.to_string())
+            .chain_err(|| "Failed to create CenterDevice client")?
             .header(Authorization(Bearer { token: access_token.to_string() }))
             .header(ContentType(mime!(Star/Star)));
 
@@ -125,12 +142,13 @@ mod download {
 }
 
 pub mod search {
+    use super::prepare_request;
+    use net::http::tls_client;
+
     use utils::console::*;
 
-    use hyper::Client;
-    use hyper::header::{ContentType, Authorization, Bearer, Accept, qitem};
-    use hyper::net::HttpsConnector;
-    use hyper_native_tls::NativeTlsClient;
+    use hyper::header::{ContentType, Accept, qitem};
+    use hyper::method::Method;
     use serde::Serialize;
     use serde_json;
     use std::io::Read;
@@ -150,6 +168,7 @@ pub mod search {
         None,
         PublicCollections
     }
+
     #[derive(Serialize, Debug)]
     struct Search<'a, T: Serialize> {
         action: &'a str,
@@ -175,7 +194,7 @@ pub mod search {
     }
 
     #[derive(Serialize, Debug)]
-    struct Named<'a, T: Serialize>{
+    struct Named<'a, T: Serialize> {
         name: &'a str,
         params: T,
     }
@@ -191,10 +210,9 @@ pub mod search {
             tags: Option<Vec<&'a str>>,
             fulltext: Option<&'a str>,
             named: Option<Vec<Named<'a, T>>>) -> Self {
-
             let filter = Filter { filenames: filenames, tags: tags };
             let query = Query { text: fulltext };
-            let params = Params { query: query, filter: filter, named: named};
+            let params = Params { query: query, filter: filter, named: named };
 
             Search { action: "search", params: params }
         }
@@ -206,7 +224,6 @@ pub mod search {
         tags: Option<Vec<&str>>,
         fulltext: Option<&str>,
         named_searches: NamedSearches) -> Result<String> {
-
         do_search_documents(access_token, filenames, tags, fulltext, named_searches)
             .chain_err(|| ErrorKind::HttpSearchCallFailed)
     }
@@ -217,11 +234,10 @@ pub mod search {
         tags: Option<Vec<&str>>,
         fulltext: Option<&str>,
         named_searches: NamedSearches) -> Result<String> {
-
         let named: Option<Vec<Named<Include>>> = match named_searches {
             NamedSearches::None => None,
             NamedSearches::PublicCollections => {
-                let includes = Include{ include: true };
+                let includes = Include { include: true };
                 let named = vec![Named { name: "public-collections", params: includes }];
                 Some(named)
             }
@@ -231,12 +247,10 @@ pub mod search {
 
         verboseln(format!("search = '{:?}'", search_json));
 
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
-
-        let request = client.post("https://api.centerdevice.de/v2/documents")
-            .header(Authorization(Bearer { token: access_token.to_string() }))
+        let url = "https://api.centerdevice.de/v2/documents";
+        let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
+        let request = prepare_request(&client, Method::Post, url, access_token.to_string())
+            .chain_err(|| "Failed to create CenterDevice client")?
             .header(ContentType(mime!(Application / Json)))
             .header(Accept(vec![qitem(mime!(Application/ Json; Charset = Utf8))]))
             .body(&search_json);
@@ -401,3 +415,5 @@ mod upload {
         output
     }
 }
+
+

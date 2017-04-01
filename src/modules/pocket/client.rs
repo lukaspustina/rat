@@ -4,12 +4,11 @@ pub use self::send::send;
 
 mod auth {
     use config::{Config, OutputFormat};
+    use net::http::tls_client;
     use utils::console::*;
 
     use hyper::Client;
     use hyper::header::ContentType;
-    use hyper::net::HttpsConnector;
-    use hyper_native_tls::NativeTlsClient;
     use mime::Mime;
     use serde_json;
     use std::io;
@@ -58,9 +57,7 @@ mod auth {
     }
 
     fn do_auth(config: &Config, open_browser: bool) -> Result<()> {
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
+        let client = tls_client().chain_err(|| "Failed to create TLS client")?;
 
         let code = get_code(&client, config)?;
         web_auth(&code, open_browser)?;
@@ -148,13 +145,11 @@ mod auth {
 
 pub mod list {
     use config::Config;
+    use net::http::tls_client;
     use utils::console::*;
 
     use chrono::{DateTime, NaiveDateTime, UTC};
-    use hyper::Client;
     use hyper::header::ContentType;
-    use hyper::net::HttpsConnector;
-    use hyper_native_tls::NativeTlsClient;
     use serde_json;
     use std::collections::HashMap;
     use std::io::Read;
@@ -257,9 +252,7 @@ pub mod list {
         let request_json = serde_json::to_string(&request).chain_err(|| "JSON serialization failed")?;
         verboseln(format!("request = {}", request_json));
 
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
+        let client = tls_client().chain_err(|| "Failed to create TLS client")?;
 
         let url = "https://getpocket.com/v3/get";
         let mut response = client
@@ -365,11 +358,9 @@ pub mod list {
 }
 
 pub mod send {
+    use net::http::tls_client;
     use config::Config;
 
-    use hyper::Client;
-    use hyper::net::HttpsConnector;
-    use hyper_native_tls::NativeTlsClient;
     use serde_json;
     use serde_urlencoded;
     use std::io::Read;
@@ -427,9 +418,7 @@ pub mod send {
         let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
         let url = format!("https://getpocket.com/v3/send?{}", parameters_enc);
 
-        let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
-        let connector = HttpsConnector::new(ssl);
-        let client = Client::with_connector(connector);
+        let client = tls_client().chain_err(|| "Failed to create TLS client")?;
         let mut response = client
             .get(&url)
             .send()

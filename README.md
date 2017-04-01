@@ -294,13 +294,27 @@ rat bosun silence set
 
 * [X] Replace Pocket list and search by search that optionally takes a search term
 
-* [ ] Travis
+* [X] Travis
 
     * [X] packagecloud.io
 
     * [X] Add Badges for Travis in Cargo.toml and Readme
 
-* [ ] Wait for new select release and then let Travis publish to crates.io
+* [X] Wait for new select release and then let Travis publish to crates.io
+
+* [ ] CenterDevice
+
+    * [X] Refactor client lib
+
+    * [ ] search for collections
+
+    * [ ] upload to collection
+
+    * [ ] named collections
+
+    * [ ] upload to named collections
+
+* [ ] Elastic tabstops for output where appropriate
 
 * [ ] Tests
 
