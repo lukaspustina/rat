@@ -407,13 +407,20 @@ mod upload {
 
     #[derive(Serialize, Debug)]
     struct Actions<'a> {
-        #[serde(skip_serializing_if = "Option::is_none", rename(serialize = "add-tag"))] tags: Option<Vec<&'a str>>
+        #[serde(skip_serializing_if = "Option::is_none", rename(serialize = "add-tag"))] tags: Option<Vec<&'a str>>,
+        #[serde(skip_serializing_if = "Option::is_none", rename(serialize = "add-to-collection"))] collections: Option<Vec<&'a str>>,
     }
 
     impl<'a> DocumentMetadata<'a> {
-        pub fn new(filename: &'a str, size: u64, title: Option<&'a str>, tags: Option<Vec<&'a str>>) -> Self {
+        pub fn new(
+            filename: &'a str,
+            size: u64,
+            title: Option<&'a str>,
+            tags: Option<Vec<&'a str>>,
+            collections: Option<Vec<&'a str>>
+        ) -> Self {
             let document = Document { filename: filename, size: size, title: title, author: None };
-            let actions = Actions { tags: tags };
+            let actions = Actions { tags: tags, collections: collections };
             let metadata = Metadata { document: document, actions: Some(actions) };
             DocumentMetadata { metadata: metadata }
         }
@@ -425,9 +432,10 @@ mod upload {
         filename: &str,
         mime: Mime,
         title: Option<&str>,
-        tags: Option<Vec<&str>>)
-        -> Result<String> {
-        do_upload_document(access_token, file, filename, mime, title, tags)
+        tags: Option<Vec<&str>>,
+        collections: Option<Vec<&str>>
+    ) -> Result<String> {
+        do_upload_document(access_token, file, filename, mime, title, tags, collections)
             .chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
 
@@ -437,8 +445,10 @@ mod upload {
         filename: &str,
         mime: Mime,
         title: Option<&str>,
-        tags: Option<Vec<&str>>) -> Result<String> {
-        let doc_metadata_json_bytes = create_doc_metadata(file, filename, title, tags)?.into_bytes();
+        tags: Option<Vec<&str>>,
+        collections: Option<Vec<&str>>
+    ) -> Result<String> {
+        let doc_metadata_json_bytes = create_doc_metadata(file, filename, title, tags, collections)?.into_bytes();
         let boundary = generate_boundary(&doc_metadata_json_bytes);
         let boundary_bytes = boundary.clone().into_bytes();
         let nodes = create_multipart_nodes(
@@ -463,9 +473,15 @@ mod upload {
         Ok(response_body)
     }
 
-    fn create_doc_metadata(file: &Path, filename: &str, title: Option<&str>, tags: Option<Vec<&str>>) -> Result<String> {
+    fn create_doc_metadata(
+        file: &Path,
+        filename: &str,
+        title: Option<&str>,
+        tags: Option<Vec<&str>>,
+        collections: Option<Vec<&str>>
+    ) -> Result<String> {
         let size = fs::metadata(file).chain_err(|| "Failed to get metadata for file")?.len();
-        let doc_metadata = DocumentMetadata::new(filename, size, title, tags);
+        let doc_metadata = DocumentMetadata::new(filename, size, title, tags, collections);
         let doc_metadata_json = serde_json::to_string(&doc_metadata).chain_err(|| "JSON serialization failed")?;
 
         verboseln(format!("document metadata = '{:?}'", doc_metadata_json));

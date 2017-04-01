@@ -63,6 +63,12 @@ pub fn build_sub_cli() -> App<'static, 'static> {
             .takes_value(true)
             .multiple(true)
             .help("Sets tag for document"))
+        .arg(Arg::with_name("collection")
+            .long("collection")
+            .short("c")
+            .takes_value(true)
+            .multiple(true)
+            .help("Set collection id to add document to"))
         .arg(Arg::with_name("file")
             .index(1)
             .required(true)
@@ -86,11 +92,18 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     };
     let title = args.value_of("title");
     let tags: Option<Vec<&str>> = args.values_of("tags").map(|c| c.collect());
+    let collections: Option<Vec<&str>> = args.values_of("collection").map(|c| c.collect());
 
     info(format!("Uploading file '{}' ...", filename));
     let json = client::upload_document(
-        config.centerdevice.access_token.as_ref().unwrap(), file_path, filename, mime_type, title, tags)
-        .chain_err(|| ErrorKind::CenterDeviceUploadFailed)?;
+        config.centerdevice.access_token.as_ref().unwrap(),
+        file_path,
+        filename,
+        mime_type,
+        title,
+        tags,
+        collections
+    ).chain_err(|| ErrorKind::CenterDeviceUploadFailed)?;
 
     output(&json, &config.general.output_format)
 }

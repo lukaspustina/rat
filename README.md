@@ -308,7 +308,7 @@ rat bosun silence set
 
     * [ ] search for collections
 
-    * [ ] upload to collection
+    * [X] upload to collection
 
     * [ ] named collections
 
