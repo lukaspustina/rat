@@ -70,6 +70,7 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
     let price = pc_split.nth(0)
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("price".to_string()))?
         .trim()
+        .replace(".", "") // thousand separation
         .replace(",", ".") // decimal separation
         .parse()
         .chain_err(|| ErrorKind::ComdirectScrapingFailed("price".to_string()))?;
@@ -110,6 +111,18 @@ mod test {
         assert_eq!(db.wkn, "514000");
         assert_eq!(db.date, "10.03.17\u{a0}\u{a0}17:35:07\u{a0}Uhr");
         assert_eq!(db.price, 18.26f32);
+        assert_eq!(db.currency, "EUR");
+    }
+
+    #[test]
+    fn test_parse_file_with_thousand_separator() {
+        let body = get_stock_page("test/data/stocks/amunid_thousand_period.html").unwrap();
+        let db = parse_stock_price(&body).unwrap();
+
+        assert_eq!(db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
+        //assert_eq!(db.wkn, "A0X8ZS");
+        assert_eq!(db.date, "11.04.17\u{a0}\u{a0}17:36:18\u{a0}Uhr");
+        assert_eq!(db.price, 1359.80f32);
         assert_eq!(db.currency, "EUR");
     }
 
