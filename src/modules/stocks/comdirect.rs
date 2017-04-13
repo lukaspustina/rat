@@ -4,7 +4,7 @@ use utils::console::*;
 
 use hyper::header::Connection;
 use select::document::Document;
-use select::predicate::{Predicate, Attr, Class, Name};
+use select::predicate::{Attr, Class, Name, Predicate, Text};
 use serde_urlencoded;
 use std::io::Read;
 
@@ -24,7 +24,7 @@ error_chain! {
 }
 
 pub fn scrape_stock_price(search: String) -> Result<StockPrice> {
-    let parameters = &[("SEARCH_VALUE", search) ];
+    let parameters = &[("SEARCH_VALUE", search)];
     let parameters_enc = serde_urlencoded::to_string(&parameters)
         .chain_err(|| "Could not encode URL parameters")?;
     let url = format!("{}?{}", BASE_URL, parameters_enc);
@@ -59,12 +59,20 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
 
     let name = document.find(Name("h1")).nth(0)
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("name".to_string()))?.text();
+
     let price_currency = document.find(Class("price")).nth(0)
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price".to_string()))?.text();
+
     let date = document.find(Attr("id", "keyelement_kurs_update").descendant(Class("date"))).last()
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date".to_string()))?.text();
-    let wkn = document.find(Class("clearfix").descendant(Name("table")).descendant(Name("tr")).descendant(Class("right"))).last()
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN".to_string()))?.text();
+
+    let trs = document.find(Class("clearfix").child(Name("table").and(Class("alternate_2n"))).child(Name("tbody")).child(Name("tr")));
+    let wkn: String = trs
+        .into_iter()
+        .filter(|tr| tr.find(Name("tr").child(Name("td").and(Class("left"))).child(Text)).nth(0).map_or(false, |x| x.text() == "WKN"))
+        .flat_map(|tr| tr.find(Name("tr").child(Name("td").and(Class("right"))).child(Text)).nth(0).map(|x| x.text()))
+        .nth(0)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN".to_string()))?;
 
     let mut pc_split = price_currency.split_whitespace();
     let price = pc_split.nth(0)
@@ -107,11 +115,11 @@ mod test {
         let body = get_stock_page("test/data/stocks/deutsche_bank.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
-        assert_eq!(db.name, "Deutsche Bank AG Namens-Aktien o.N.");
-        assert_eq!(db.wkn, "514000");
-        assert_eq!(db.date, "10.03.17\u{a0}\u{a0}17:35:07\u{a0}Uhr");
-        assert_eq!(db.price, 18.26f32);
-        assert_eq!(db.currency, "EUR");
+        assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
+        assert_eq! (db.wkn, "514000");
+        assert_eq! (db.date, "10.03.17\u{a0}\u{a0}17:35:07\u{a0}Uhr");
+        assert_eq! (db.price, 18.26f32);
+        assert_eq! (db.currency, "EUR");
     }
 
     #[test]
@@ -119,11 +127,11 @@ mod test {
         let body = get_stock_page("test/data/stocks/amunid_thousand_period.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
-        assert_eq!(db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
-        //assert_eq!(db.wkn, "A0X8ZS");
-        assert_eq!(db.date, "11.04.17\u{a0}\u{a0}17:36:18\u{a0}Uhr");
-        assert_eq!(db.price, 1359.80f32);
-        assert_eq!(db.currency, "EUR");
+        assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
+        assert_eq! (db.wkn, "A0X8ZS");
+        assert_eq! (db.date, "11.04.17\u{a0}\u{a0}17:36:18\u{a0}Uhr");
+        assert_eq! (db.price, 1359.80f32);
+        assert_eq! (db.currency, "EUR");
     }
 
     #[test]
@@ -131,7 +139,7 @@ mod test {
         let body = get_stock_page("test/data/stocks/no_exact_match.html").unwrap();
         let db = parse_stock_price(&body);
 
-        assert!(db.is_err());
+        assert! (db.is_err());
     }
 
     #[test]
@@ -139,10 +147,21 @@ mod test {
         ::utils::console::init(::config::Verbosity::QUIET);
         let db = scrape_stock_price("Deutsche Bank".to_string()).unwrap();
 
-        assert_eq!(db.name, "Deutsche Bank AG Namens-Aktien o.N.");
-        assert_eq!(db.wkn, "514000");
-        assert!(db.price > 0.00f32);
-        assert_eq!(db.currency, "EUR");
+        assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
+        assert_eq! (db.wkn, "514000");
+        assert! (db.price > 0.00f32);
+        assert_eq! (db.currency, "EUR");
+    }
+
+    #[test]
+    fn test_parse_online_with_thousand_separator() {
+        ::utils::console::init(::config::Verbosity::QUIET);
+        let db = scrape_stock_price("A0X8ZS".to_string()).unwrap();
+
+        assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
+        assert_eq! (db.wkn, "A0X8ZS");
+        assert! (db.price > 0.00_f32);
+        assert_eq! (db.currency, "EUR");
     }
 
     #[test]
@@ -155,6 +174,6 @@ mod test {
             Error(ErrorKind::ComdirectSearchResultNotUnique, _) => true,
             _ => false
         };
-        assert!(result_is_not_unique);
+        assert! (result_is_not_unique);
     }
- }
+}
