@@ -37,6 +37,7 @@ pub enum Verbosity {
 
 #[derive(Debug, Deserialize)]
 pub struct GeneralConfig {
+    pub cache_dir: String,
     pub output_format: OutputFormat,
     pub verbosity: Verbosity,
 }

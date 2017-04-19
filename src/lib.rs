@@ -24,6 +24,7 @@ extern crate webbrowser;
 
 #[cfg(test)] #[macro_use] extern crate pretty_assertions;
 
+pub mod cache;
 pub mod config;
 pub mod errors;
 pub mod modules;

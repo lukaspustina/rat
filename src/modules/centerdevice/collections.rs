@@ -1,6 +1,7 @@
 use super::client;
 use super::client::collections::CollectionsResult;
 
+use cache::Cache;
 use config::{Config, OutputFormat};
 use utils::console::*;
 use utils::output;
@@ -30,6 +31,9 @@ error_chain! {
 pub fn build_sub_cli() -> App<'static, 'static> {
     SubCommand::with_name(NAME)
         .about("Search for collections in CenterDevice")
+        .arg(Arg::with_name("cache")
+            .long("cache")
+            .help("Caches collections for other commands"))
         .arg(Arg::with_name("name")
             .long("name")
             .short("n")
@@ -48,6 +52,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let args = args.unwrap();
 
+    let cache = args.is_present("cache");
     let name: Option<&str> = args.value_of("name");
     let include_public = args.is_present("public_collections");
     let filter = args.value_of("filter");
@@ -59,6 +64,13 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let json = client::search_collections(
         config.centerdevice.access_token.as_ref().unwrap(), name, include_public, filter)
         .chain_err(|| ErrorKind::CenterDeviceCollectionFailed)?;
+
+    if cache {
+        info("Updating cache ...");
+        let collections: CollectionsResult = serde_json::from_str(&json).chain_err(|| "JSON parsing failed")?;
+        let cache: Cache = Cache::new(&config, super::NAME, NAME);
+        cache.write(&collections).chain_err(|| "Failed to write cache")?
+    }
 
     output(&json, &config.general.output_format)
 }

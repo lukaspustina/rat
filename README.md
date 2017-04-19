@@ -318,6 +318,8 @@ rat bosun silence set
 
     * [ ] upload to named collections
 
+    * [ ] Token Refresh / Error messages when token has expired
+
 * [ ] Elastic tabstops for output where appropriate
 
 * [ ] Tests

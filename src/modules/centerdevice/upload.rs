@@ -1,5 +1,7 @@
 use super::client;
+use super::client::collections::CollectionsResult;
 
+use cache::Cache;
 use config::{Config, OutputFormat};
 use utils::console::*;
 use utils::output;
@@ -69,6 +71,12 @@ pub fn build_sub_cli() -> App<'static, 'static> {
             .takes_value(true)
             .multiple(true)
             .help("Set collection id to add document to"))
+        .arg(Arg::with_name("cached-collection-name")
+            .long("Collection")
+            .short("C")
+            .takes_value(true)
+            .multiple(true)
+            .help("Set collection id by name from collection cache; cf. `centerdevice collections` help"))
         .arg(Arg::with_name("file")
             .index(1)
             .required(true)
@@ -92,7 +100,25 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     };
     let title = args.value_of("title");
     let tags: Option<Vec<&str>> = args.values_of("tags").map(|c| c.collect());
-    let collections: Option<Vec<&str>> = args.values_of("collection").map(|c| c.collect());
+    let cache: CollectionsResult; // Needs to outlive collections
+    let mut collections: Option<Vec<&str>> = args.values_of("collection").map(|c| c.collect());
+
+    if args.is_present("cached-collection-name") {
+        cache = Cache::new(config, super::NAME, super::collections::NAME)
+            .load().chain_err(|| "Could not load collections cache")?;
+        verboseln(format!("Loaded collections cache with {} items.", cache.collections.len()));
+
+        let selected_col_names: Vec<&str> = args.values_of("cached-collection-name").map(|c| c.collect()).unwrap();
+        for cn in selected_col_names {
+            if let Some(c) = cache.collections.iter().find(|ref c| c.name == cn) {
+                let mut cs: Vec<&str> = collections.unwrap_or_else(|| Vec::new());
+                cs.push(&c.id);
+                collections = Some(cs)
+            } else {
+                bail!("No collection with name '{}' found in collections cache.", cn)
+            }
+        }
+    }
 
     info(format!("Uploading file '{}' ...", filename));
     let json = client::upload_document(
