@@ -2,6 +2,8 @@
 
 ## RAT - the Rest Api Tool
 
+Rat is simple command line tool that helps me automate repetitive tasks for my favorite web services and software products which expose a REST API. The general guideline for all commands rat supports is that should perform only one thing preferably with only one HTTP call. This guideline follows the UNIX principle that tools should to one thing and complex behaviour is achieved by pipelining.
+
 [![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/rat.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/rat) [![Windows Build status](https://img.shields.io/appveyor/ci/lukaspustina/rat.svg?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/lukaspustina/rat/branch/master) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE) [![](http://meritbadge.herokuapp.com/rat)](https://crates.io/crates/rat)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -213,6 +215,8 @@ Create a [new application](https://api.slack.com/apps) and add the newly created
 # Clients to Come
 
 ```bash
+rat feedly
+
 rat elasticsearch browse
 rat elasticsearch status -- curl -s http://<host>:9200/_cluster/health?level=shards
 rat elasticsearch health -- curl -s http://<host>:9200/_cluster/health
