@@ -329,9 +329,9 @@ rat bosun silence set
 
     * [X] upload to collection
 
-    * [ ] named collections
+    * [X] named collections
 
-    * [ ] upload to named collections
+    * [X] upload to named collections
 
     * [ ] Token Refresh / Error messages when token has expired
 
