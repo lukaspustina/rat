@@ -20,6 +20,7 @@ Rat is simple command line tool that helps me automate repetitive tasks for my f
   - [General](#general)
   - [CenterDevice](#centerdevice)
     - [Authenticate rat](#authenticate-rat)
+    - [Search collection](#search-collection)
     - [Download document](#download-document)
     - [Search document](#search-document)
     - [Upload document](#upload-document)
@@ -51,6 +52,7 @@ Rat is simple command line tool that helps me automate repetitive tasks for my f
 **CenterDevice**
 ```bash
 rat centerdevice auth
+rat centerdevice collections
 rat centerdevice download
 rat centerdevice search
 rat centerdevice status
@@ -126,6 +128,16 @@ The message output levels configure how talkative rat is during execution. The q
 
 `rat centerdevice auth` and follow the instructions.
 
+### Search collection
+
+* Show my collections: `rat centerdevice collections`
+
+* Show my as well as public collections: `rat centerdevice collections --public-collections`
+
+* Search collections: `rat centerdevice collections <search filter>`
+
+* Cache collection names for other commands: `rat centerdevice collections --cache`
+
 ### Download document
 
 * Download document into current directory with original filename: `rat centerdevice download excbd68a-c397-id46-9350-a4fd4022fe8c`
@@ -142,8 +154,11 @@ The message output levels configure how talkative rat is during execution. The q
 
 ### Upload document
 
-`rat centerdevice upload README.md -t documentation -t rat`
+* Upload documen with tags: `rat centerdevice upload README.md -t documentation -t rat`
 
+* Upload document to collection: `rat centerdevice upload README.md --collection <collection id>`
+
+* Upload document to collection using collection cache: `rat centerdevice upload README.md --Collection <cached collection name>`
 
 ## Pocket
 
