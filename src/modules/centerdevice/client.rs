@@ -1,4 +1,5 @@
 pub use self::collections::search_collections;
+pub use self::delete::delete_documents;
 pub use self::download::download_document;
 pub use self::search::search_documents;
 pub use self::upload::upload_document;
@@ -102,6 +103,69 @@ pub mod collections {
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
         let request = prepare_request(&client, Method::Get, &url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?;
+
+        let mut response = request.send().chain_err(|| "Failed to finish http request")?;
+
+        let mut body = Vec::new();
+        response.read_to_end(&mut body).chain_err(|| "Failed to read server response")?;
+        let response_body = String::from_utf8_lossy(&body).to_string();
+
+        Ok(response_body)
+    }
+}
+
+mod delete {
+    use super::prepare_request;
+    use net::http::tls_client;
+
+    use hyper::method::Method;
+    use hyper::header::{ContentType, Accept, qitem};
+    use serde_json;
+    use std::io::Read;
+    use std::str;
+
+    error_chain! {
+        errors {
+            HttpUploadCallFailed {
+                description("failed to make http delete call")
+                display("failed to make http delete call")
+            }
+        }
+    }
+
+    #[derive(Serialize, Debug)]
+    struct DeleteAction<'a> {
+        action: &'a str,
+        params: Documents<'a>,
+    }
+
+    #[derive(Serialize, Debug)]
+    struct Documents<'a> {
+        documents: Vec<&'a str>,
+    }
+
+    impl<'a> DeleteAction<'a> {
+        pub fn new(documents: Vec<&'a str>) -> Self {
+            let params = Documents { documents: documents };
+            DeleteAction { action: "delete", params: params }
+        }
+    }
+
+    pub fn delete_documents( access_token: &str, document_ids: Vec<&str>) -> Result<String> {
+        do_delete_documents(access_token, document_ids).chain_err(|| ErrorKind::HttpUploadCallFailed)
+    }
+
+    fn do_delete_documents( access_token: &str, document_ids: Vec<&str>) -> Result<String> {
+        let delete = DeleteAction::new(document_ids);
+        let delete_json = serde_json::to_string(&delete).chain_err(|| "JSON serialization failed")?;
+
+        let url = "https://api.centerdevice.de/v2/documents";
+        let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
+        let request = prepare_request(&client, Method::Post, url, access_token.to_string())
+            .chain_err(|| "Failed to create CenterDevice client")?
+            .header(ContentType(mime!(Application / Json)))
+            .header(Accept(vec![qitem(mime!(Application/ Json; Charset = Utf8))]))
+            .body(&delete_json);
 
         let mut response = request.send().chain_err(|| "Failed to finish http request")?;
 
