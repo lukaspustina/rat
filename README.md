@@ -20,10 +20,12 @@ Rat is a simple command line tool that helps me automate repetitive tasks for my
   - [General](#general)
   - [CenterDevice](#centerdevice)
     - [Authenticate rat](#authenticate-rat)
+    - [Refresh access token](#refresh-access-token)
     - [Search collection](#search-collection)
     - [Download document](#download-document)
     - [Search document](#search-document)
     - [Upload document](#upload-document)
+    - [Delete document](#delete-document)
   - [Pocket](#pocket)
     - [Authentication](#authentication)
       - [Create a consumer key](#create-a-consumer-key)
@@ -53,7 +55,9 @@ Rat is a simple command line tool that helps me automate repetitive tasks for my
 ```bash
 rat centerdevice auth
 rat centerdevice collections
+rat centerdevice delete
 rat centerdevice download
+rat centerdevice refresh_token
 rat centerdevice search
 rat centerdevice status
 rat centerdevice upload
@@ -128,6 +132,10 @@ The message output levels configure how talkative rat is during execution. The q
 
 `rat centerdevice auth` and follow the instructions.
 
+### Refresh access token
+
+`rat centerdevice refresh_token`
+
 ### Search collection
 
 * Show my collections: `rat centerdevice collections`
@@ -159,6 +167,11 @@ The message output levels configure how talkative rat is during execution. The q
 * Upload document to collection: `rat centerdevice upload README.md --collection <collection id>`
 
 * Upload document to collection using collection cache: `rat centerdevice upload README.md --Collection <cached collection name>`
+
+### Delete document
+
+`rat centerdevice delete excbd68a-c397-id46-9350-a4fd4022fe8c`
+
 
 ## Pocket
 
@@ -321,7 +334,7 @@ rat bosun silence set
 
 * [X] Wait for new select release and then let Travis publish to crates.io
 
-* [ ] CenterDevice
+* [X] CenterDevice
 
     * [X] Refactor client lib
 
@@ -333,7 +346,9 @@ rat bosun silence set
 
     * [X] upload to named collections
 
-    * [ ] Token Refresh / Error messages when token has expired
+    * [X] delete document
+
+    * [X] Token Refresh / Error messages when token has expired
 
 * [ ] Elastic tabstops for output where appropriate
 
