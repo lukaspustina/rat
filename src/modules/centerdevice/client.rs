@@ -1,6 +1,7 @@
 pub use self::collections::search_collections;
 pub use self::delete::delete_documents;
 pub use self::download::download_document;
+pub use self::refresh_token::refresh_token;
 pub use self::search::search_documents;
 pub use self::upload::upload_document;
 
@@ -68,7 +69,6 @@ pub mod collections {
         include_public: bool,
         filter: Option<&str>
     ) -> Result<String> {
-
         let json = do_search_collections(access_token, name, include_public)
             .chain_err(|| ErrorKind::HttpCollectionCallFailed);
         if filter.is_none() {
@@ -81,7 +81,6 @@ pub mod collections {
 
         let json = serde_json::to_string(&collections_result).chain_err(|| "Failed to serialize JSON")?;
         Ok(json)
-
     }
 
     fn do_search_collections(
@@ -151,11 +150,11 @@ mod delete {
         }
     }
 
-    pub fn delete_documents( access_token: &str, document_ids: Vec<&str>) -> Result<String> {
+    pub fn delete_documents(access_token: &str, document_ids: Vec<&str>) -> Result<String> {
         do_delete_documents(access_token, document_ids).chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
 
-    fn do_delete_documents( access_token: &str, document_ids: Vec<&str>) -> Result<String> {
+    fn do_delete_documents(access_token: &str, document_ids: Vec<&str>) -> Result<String> {
         let delete = DeleteAction::new(document_ids);
         let delete_json = serde_json::to_string(&delete).chain_err(|| "JSON serialization failed")?;
 
@@ -295,6 +294,46 @@ mod download {
         }
 
         Ok(written)
+    }
+}
+
+mod refresh_token {
+    use net::http::tls_client;
+
+    use hyper::header::{ContentType, Authorization, Basic};
+    use std::io::Read;
+    use std::str;
+
+    error_chain! {
+        errors {
+            HttpUploadCallFailed {
+                description("failed to make http refresh access token call")
+                display("failed to make http refresh access token call")
+            }
+        }
+    }
+
+    pub fn refresh_token(refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
+        do_refresh_token(refresh_token, client_id, client_secret).chain_err(|| ErrorKind::HttpUploadCallFailed)
+    }
+
+    fn do_refresh_token(refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
+        let body = format!("grant_type=refresh_token&refresh_token={}", refresh_token);
+        let url = "https://auth.centerdevice.de/token";
+        let client = tls_client().chain_err(|| "Could not create TLS client")?;
+        let mut response = client
+            .post(url)
+            .header(Authorization(Basic { username: client_id.to_string(), password: Some(client_secret.to_string()) }))
+            .header(ContentType(mime!(Application / WwwFormUrlEncoded)))
+            .body(&body)
+            .send()
+            .chain_err(|| "Failed to finish HTTP request")?;
+
+        let mut body = Vec::new();
+        response.read_to_end(&mut body).chain_err(|| "Failed to read HTTP response")?;
+        let response_body = String::from_utf8_lossy(&body).to_string();
+
+        Ok(response_body)
     }
 }
 

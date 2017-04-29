@@ -10,6 +10,7 @@ mod client;
 mod collections;
 mod delete;
 mod download;
+mod refresh_token;
 mod search;
 mod status;
 mod upload;
@@ -29,6 +30,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
         .subcommand(collections::build_sub_cli())
         .subcommand(delete::build_sub_cli())
         .subcommand(download::build_sub_cli())
+        .subcommand(refresh_token::build_sub_cli())
         .subcommand(search::build_sub_cli())
         .subcommand(status::build_sub_cli())
         .subcommand(upload::build_sub_cli())
@@ -45,6 +47,8 @@ pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         delete::NAME => delete::call(subcommand.subcommand_matches(subcommand_name), config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         download::NAME => download::call(subcommand.subcommand_matches(subcommand_name), config)
+            .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
+        refresh_token::NAME => refresh_token::call(subcommand.subcommand_matches(subcommand_name), config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),
         search::NAME => search::call(subcommand.subcommand_matches(subcommand_name), config)
             .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string())),

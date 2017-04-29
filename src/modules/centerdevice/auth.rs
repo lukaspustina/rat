@@ -19,11 +19,11 @@ error_chain! {
 }
 
 #[derive(Deserialize, Debug)]
-struct CenterDeviceToken {
-    token_type: String,
-    expires_in: u32,
-    refresh_token: String,
-    access_token: String,
+pub struct CenterDeviceToken {
+    pub token_type: String,
+    pub expires_in: u32,
+    pub refresh_token: String,
+    pub access_token: String,
 }
 
 pub fn build_sub_cli() -> App<'static, 'static> {
