@@ -350,7 +350,9 @@ rat bosun silence set
 
     * [X] Token Refresh / Error messages when token has expired
 
-* [ ] Elastic tabstops for output where appropriate
+* [X] Elastic tabstops for output where appropriate
+
+    * [X] pocket list -- but not everywhere
 
 * [ ] Tests
 

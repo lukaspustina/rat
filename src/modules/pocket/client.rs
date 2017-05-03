@@ -148,7 +148,6 @@ pub mod list {
     use net::http::tls_client;
     use utils::console::*;
 
-    use chrono::{DateTime, NaiveDateTime, UTC};
     use hyper::header::ContentType;
     use serde_json;
     use std::collections::HashMap;
@@ -294,25 +293,6 @@ pub mod list {
         }
     }
 
-    #[derive(Debug)]
-    pub struct HumanOutput {
-        pub id: bool,
-        pub title: bool,
-        pub url: bool,
-        pub t_added: bool,
-    }
-
-    impl<'a> From<Vec<&'a str>> for HumanOutput {
-        fn from(v: Vec<&'a str>) -> Self {
-            let id = v.contains(&"id");
-            let title = v.contains(&"title");
-            let url = v.contains(&"url");
-            let t_added = v.contains(&"t_added");
-
-            HumanOutput { id: id, title: title, url: url, t_added: t_added }
-        }
-    }
-
     #[derive(Serialize, Deserialize, Debug)]
     pub struct Article {
         pub item_id: String,
@@ -323,36 +303,9 @@ pub mod list {
     }
 
     impl Article {
-        fn time_added(&self) -> Result<Duration> {
+        pub fn time_added(&self) -> Result<Duration> {
             let secs: u64 = self.time_added.parse().chain_err(|| "Failed to parse time")?;
             Ok(Duration::from_secs(secs))
-        }
-
-        pub fn human_display(&self, human_output: &HumanOutput) -> Result<String> {
-            let mut outputs = Vec::new();
-            if human_output.id {
-                outputs.push(self.item_id.clone());
-            }
-            if human_output.title {
-                outputs.push(format!("'{}'", &self.resolved_title));
-            }
-            if human_output.url {
-                outputs.push(self.resolved_url.clone());
-            }
-            if human_output.t_added {
-                let d = self.time_added()?;
-                let dt = DateTime::<UTC>::from_utc(
-                    NaiveDateTime::from_timestamp(d.as_secs() as i64, d.subsec_nanos()), UTC);
-                outputs.push(format!("added {}", &dt.to_rfc3339()));
-            }
-
-            let mut out_str: String = outputs.first().unwrap().to_string();
-            outputs.remove(0);
-            for o in outputs {
-                out_str = out_str + &format!(", {}", o);
-            }
-
-            Ok(out_str)
         }
     }
 }

@@ -1,13 +1,16 @@
 use super::client;
-use super::client::list::{HumanOutput, ListResult, Request};
+use super::client::list::{Article, ListResult, Request};
 use config::{Config, OutputFormat};
 use utils::console::*;
 use utils::output;
 use utils::time;
 
+use chrono::{DateTime, NaiveDateTime, UTC};
 use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
+use std::io::Write;
 use std::str;
+use tabwriter::TabWriter;
 
 pub const NAME: &'static str = "list";
 
@@ -130,4 +133,56 @@ fn output_human(json: &str, human_output: &HumanOutput) -> Result<()> {
     }
 
     Ok(())
+}
+
+
+#[derive(Debug)]
+pub struct HumanOutput {
+    pub id: bool,
+    pub title: bool,
+    pub url: bool,
+    pub t_added: bool,
+}
+
+impl<'a> From<Vec<&'a str>> for HumanOutput {
+    fn from(v: Vec<&'a str>) -> Self {
+        let id = v.contains(&"id");
+        let title = v.contains(&"title");
+        let url = v.contains(&"url");
+        let t_added = v.contains(&"t_added");
+
+        HumanOutput { id: id, title: title, url: url, t_added: t_added }
+    }
+}
+
+trait HumanDisplay {
+    fn human_display(&self, human_output: &HumanOutput) -> Result<String>;
+}
+
+impl HumanDisplay for Article {
+    fn human_display(&self, human_output: &HumanOutput) -> Result<String> {
+        let mut tw = TabWriter::new(vec![]);
+
+        let _ = write!(&mut tw, "* ");
+        if human_output.id {
+            let _ = write!(&mut tw, "{}:\t", self.item_id.clone());
+        }
+        if human_output.title {
+            let _ = write!(&mut tw, "'{}' ", &self.resolved_title);
+        }
+        if human_output.url {
+            let _ = write!(&mut tw, "{} ", self.resolved_url.clone());
+        }
+        if human_output.t_added {
+            let d = self.time_added().chain_err(|| "Failed to parse time")?;
+            let dt = DateTime::<UTC>::from_utc(
+                NaiveDateTime::from_timestamp(d.as_secs() as i64, d.subsec_nanos()), UTC);
+            let _ = write!(&mut tw, "added {}", &dt.to_rfc3339());
+        }
+
+        tw.flush().unwrap();
+        let out_str = String::from_utf8(tw.into_inner().unwrap()).unwrap();
+
+        Ok(out_str)
+    }
 }
