@@ -8,6 +8,7 @@ extern crate crypto;
 extern crate humantime;
 #[macro_use] extern crate hyper;
 extern crate hyper_native_tls;
+extern crate indicatif;
 extern crate itertools;
 #[macro_use] extern crate mime;
 extern crate mime_guess;

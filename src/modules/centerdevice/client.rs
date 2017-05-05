@@ -179,6 +179,7 @@ mod delete {
 mod download {
     use super::prepare_request;
     use net::http::tls_client;
+    use utils::io::ReadWithProgress;
     use utils::console::*;
 
     use hyper::client::Response;
@@ -209,18 +210,21 @@ mod download {
     }
 
 
-    pub fn download_document(
+    pub fn download_document<T: FnMut(usize, usize) -> ()>(
         access_token: &str,
         filename: Option<&str>,
-        document_id: &str) -> Result<()> {
-        do_download_document(access_token, filename, document_id)
+        document_id: &str,
+        progress: Option<T>,
+    ) -> Result<()> {
+        do_download_document(access_token, filename, document_id, progress)
             .chain_err(|| ErrorKind::HttpDownloadCallFailed)
     }
 
-    fn do_download_document(
+    fn do_download_document<T: FnMut(usize, usize) -> ()>(
         access_token: &str,
         filename: Option<&str>,
-        document_id: &str
+        document_id: &str,
+        progress: Option<T>,
     ) -> Result<()> {
         let url = format!("https://api.centerdevice.de/v2/document/{}", document_id);
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
@@ -234,9 +238,9 @@ mod download {
         let filename = get_filename(filename, &response)?;
         let size = get_content_length(&response)? as usize;
 
-        verbose(format!("Retrieving {} bytes ", size));
-        let w_size = write_to_file(&filename, &mut response)?;
-        verboseln("done.");
+        verboseln(format!("Retrieving {} bytes.", size));
+        let mut rp = ReadWithProgress::new(&mut response, size, progress);
+        let w_size = write_to_file(&filename, &mut rp)?;
 
         if w_size != size {
             bail!("Retrieved number of bytes ({}) does not match expected bytes ({}).", w_size, size);
@@ -272,25 +276,20 @@ mod download {
         Ok(size)
     }
 
-    fn write_to_file(filename: &str, response: &mut Response) -> Result<usize> {
+    fn write_to_file(filename: &str, read: &mut Read) -> Result<usize> {
         let mut out = File::create(filename).chain_err(|| "Failed to create destination file")?;
 
-        let mut buf = [0; 128 * 1024];
         let mut written: usize = 0;
-        let mut mega_bytes: usize = 0;
+        let mut buf = [0; 128 * 1024];
         loop {
-            let len = match response.read(&mut buf) {
+            let len = match read.read(&mut buf) {
                 Ok(0) => break,  // EOF.
                 Ok(len) => len,
                 Err(ref err) if err.kind() == io::ErrorKind::Interrupted => continue,
                 Err(_) => bail!("Could not read from server response")
             };
-            written += len;
-            if (written / (1024 * 1024)) - mega_bytes > 0 {
-                mega_bytes += 1;
-                verbose(".");
-            }
             out.write_all(&buf[..len]).chain_err(|| "Could not write to file")?;
+            written += len;
         }
 
         Ok(written)

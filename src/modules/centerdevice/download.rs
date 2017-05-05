@@ -1,10 +1,11 @@
 use super::client;
 
-use config::{Config, OutputFormat};
+use config::{Config, OutputFormat, Verbosity};
 use utils::console::*;
 use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use indicatif::{ProgressBar, ProgressStyle};
 use std::str;
 
 pub const NAME: &'static str = "download";
@@ -39,14 +40,32 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 
 pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let args = args.unwrap();
-
     let filename: Option<&str> = args.value_of("filename");
     let doc_id = args.value_of("id").unwrap();
 
     info(format!("Downloading document {} ...", doc_id));
-    client::download_document(
-        config.centerdevice.access_token.as_ref().unwrap(), filename, doc_id)
+
+    let mut progress_bar: Option<ProgressBar> = None;
+    let mut progress = None;
+    if config.general.output_format == OutputFormat::HUMAN && config.general.verbosity <= Verbosity::NORMAL {
+        let pb = ProgressBar::new(0);
+        pb.set_style(ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] [{bar:40.blue/blue}] {bytes}/{total_bytes} ({eta}) {msg} {spinner:.blue}")
+        );
+        progress_bar = Some(pb);
+        progress = Some(|total, delta| {
+            let pb = progress_bar.as_ref().unwrap();
+            pb.set_length(total as u64);
+            pb.set_message("downloading");
+            pb.inc(delta as u64);
+        });
+    };
+    client::download_document(config.centerdevice.access_token.as_ref().unwrap(), filename, doc_id, progress)
         .chain_err(|| ErrorKind::CenterDeviceDownloadFailed)?;
+
+    if let Some(ref pb) = progress_bar {
+        pb.finish_with_message("done");
+    };
 
     output("{}", &config.general.output_format)
 }
