@@ -2,11 +2,12 @@ use super::client;
 use super::client::collections::CollectionsResult;
 
 use cache::Cache;
-use config::{Config, OutputFormat};
+use config::{Config, OutputFormat, Verbosity};
 use utils::console::*;
 use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use indicatif::{ProgressBar, ProgressStyle};
 use mime::Mime;
 use mime_guess::guess_mime_type_opt;
 use serde_json;
@@ -120,6 +121,22 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         }
     }
 
+    let mut progress_bar: Option<ProgressBar> = None;
+    let mut progress = None;
+    if config.general.output_format == OutputFormat::HUMAN && config.general.verbosity <= Verbosity::NORMAL {
+        let pb = ProgressBar::new(0);
+        pb.set_style(ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] [{bar:40.blue/blue}] {bytes}/{total_bytes} ({eta}) {msg} {spinner:.blue}")
+        );
+        progress_bar = Some(pb);
+        progress = Some(|total, delta| {
+            let pb = progress_bar.as_ref().unwrap();
+            pb.set_length(total as u64);
+            pb.set_message("uploading");
+            pb.inc(delta as u64);
+        });
+    };
+
     info(format!("Uploading file '{}' ...", filename));
     let json = client::upload_document(
         config.centerdevice.access_token.as_ref().unwrap(),
@@ -128,8 +145,13 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         mime_type,
         title,
         tags,
-        collections
+        collections,
+        progress
     ).chain_err(|| ErrorKind::CenterDeviceUploadFailed)?;
+
+    if let Some(ref pb) = progress_bar {
+        pb.finish_with_message("done");
+    };
 
     output(&json, &config.general.output_format)
 }

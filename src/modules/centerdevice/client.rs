@@ -462,6 +462,7 @@ pub mod search {
 
 mod upload {
     use utils::console::*;
+    use utils::io::WriteWithProgress;
 
     use crypto::digest::Digest;
     use crypto::sha2::Sha256;
@@ -528,27 +529,29 @@ mod upload {
         }
     }
 
-    pub fn upload_document(
+    pub fn upload_document<T: FnMut(usize, usize) -> ()>(
         access_token: &str,
         file: &Path,
         filename: &str,
         mime: Mime,
         title: Option<&str>,
         tags: Option<Vec<&str>>,
-        collections: Option<Vec<&str>>
+        collections: Option<Vec<&str>>,
+        progress: Option<T>,
     ) -> Result<String> {
-        do_upload_document(access_token, file, filename, mime, title, tags, collections)
+        do_upload_document(access_token, file, filename, mime, title, tags, collections, progress)
             .chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
 
-    fn do_upload_document(
+    fn do_upload_document<T: FnMut(usize, usize) -> ()>(
         access_token: &str,
         file: &Path,
         filename: &str,
         mime: Mime,
         title: Option<&str>,
         tags: Option<Vec<&str>>,
-        collections: Option<Vec<&str>>
+        collections: Option<Vec<&str>>,
+        progress: Option<T>,
     ) -> Result<String> {
         let doc_metadata_json_bytes = create_doc_metadata(file, filename, title, tags, collections)?.into_bytes();
         let boundary = generate_boundary(&doc_metadata_json_bytes);
@@ -565,7 +568,11 @@ mod upload {
         client.headers_mut().set(Accept(vec![qitem(mime!(Application / Json; Charset = Utf8))]));
 
         let mut request = client.start().chain_err(|| "Failed to start HTTP connection")?;
-        write_multipart(&mut request, &boundary_bytes, &nodes).chain_err(|| "Failed to send multipart form-data")?;
+        {
+            let file_size = fs::metadata(file).unwrap().len() as usize;
+            let mut wp = WriteWithProgress::new(&mut request, file_size, progress);
+            write_multipart(&mut wp, &boundary_bytes, &nodes).chain_err(|| "Failed to send multipart form-data")?;
+        }
         let mut response = request.send().chain_err(|| "Failed to finish http request")?;
 
         let mut body = Vec::new();
