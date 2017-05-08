@@ -356,19 +356,27 @@ rat bosun silence set
 
 * [ ] Tests
 
+    * [X] Setup
+
+        * [X] clippy
+
+        * [ ] docker run
+
+    * [ ] Select integration test framework
+
+    * [ ] Integration tests
+
+    * [ ] Unit tests with quick check, naught strings
+
+    * [ ] Fuzzing tests
+
+    * [ ] [kcov with Docker](http://sunjay.ca/2016/07/25/rust-code-coverage)
+
 * [ ] Make better use of error_chain
 
     * [ ] by using Foreign errors
 
     * [ ] by using [ensure!](https://docs.rs/error-chain/0.10.0/error_chain/macro.ensure.html)
-
-* Dockerize runs for better backtraces
-
-  ```bash
-  docker run -v $PWD:/volume -w /volume -t clux/muslrust:nightly sh -c "cargo run"
-  ```
-
-* [ ] Run Clippy once cargo in nightly works again -- cf. http://asquera.de/blog/2017-03-03/setting-up-a-rust-devenv/
 
 * [ ] Move to future based clients -- cf. http://asquera.de/blog/2017-03-01/the-future-with-futures/
 
