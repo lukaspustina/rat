@@ -360,7 +360,7 @@ rat bosun silence set
 
         * [X] clippy
 
-        * [ ] docker run
+        * [X] docker run
 
     * [ ] Select integration test framework
 
