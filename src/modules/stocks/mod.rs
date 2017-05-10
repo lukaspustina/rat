@@ -7,7 +7,7 @@ use clap::{App, Arg, ArgMatches, SubCommand};
 use serde_json;
 use std::fmt;
 
-mod comdirect;
+pub mod comdirect;
 
 pub const NAME: &'static str = "stocks";
 

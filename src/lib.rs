@@ -24,6 +24,7 @@ extern crate toml;
 extern crate webbrowser;
 
 #[cfg(test)] #[macro_use] extern crate pretty_assertions;
+#[cfg(test)] extern crate spectral;
 
 pub mod cache;
 pub mod config;

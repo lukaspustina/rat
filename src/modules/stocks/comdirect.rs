@@ -111,8 +111,8 @@ mod test {
     }
 
     #[test]
-    fn test_parse_file_ok() {
-        let body = get_stock_page("test/data/stocks/deutsche_bank.html").unwrap();
+    fn parse_file_ok() {
+        let body = get_stock_page("tests/data/stocks/deutsche_bank.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
         assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
@@ -123,8 +123,8 @@ mod test {
     }
 
     #[test]
-    fn test_parse_file_with_thousand_separator() {
-        let body = get_stock_page("test/data/stocks/amunid_thousand_period.html").unwrap();
+    fn parse_file_with_thousand_separator() {
+        let body = get_stock_page("tests/data/stocks/amunid_thousand_period.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
         assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
@@ -135,45 +135,10 @@ mod test {
     }
 
     #[test]
-    fn test_parse_file_no_exact_match() {
-        let body = get_stock_page("test/data/stocks/no_exact_match.html").unwrap();
+    fn parse_file_no_exact_match() {
+        let body = get_stock_page("tests/data/stocks/no_exact_match.html").unwrap();
         let db = parse_stock_price(&body);
 
         assert! (db.is_err());
-    }
-
-    #[test]
-    fn test_parse_online_ok() {
-        ::utils::console::init(::config::Verbosity::QUIET);
-        let db = scrape_stock_price("Deutsche Bank".to_string()).unwrap();
-
-        assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
-        assert_eq! (db.wkn, "514000");
-        assert! (db.price > 0.00f32);
-        assert_eq! (db.currency, "EUR");
-    }
-
-    #[test]
-    fn test_parse_online_with_thousand_separator() {
-        ::utils::console::init(::config::Verbosity::QUIET);
-        let db = scrape_stock_price("A0X8ZS".to_string()).unwrap();
-
-        assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
-        assert_eq! (db.wkn, "A0X8ZS");
-        assert! (db.price > 0.00_f32);
-        assert_eq! (db.currency, "EUR");
-    }
-
-    #[test]
-    fn test_parse_online_no_exact_match() {
-        ::utils::console::init(::config::Verbosity::QUIET);
-        let result = scrape_stock_price("Deutsche".to_string());
-
-        // TODO: This needs to be nicer.
-        let result_is_not_unique = match result.unwrap_err() {
-            Error(ErrorKind::ComdirectSearchResultNotUnique, _) => true,
-            _ => false
-        };
-        assert! (result_is_not_unique);
     }
 }
