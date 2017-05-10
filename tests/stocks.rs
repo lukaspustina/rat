@@ -34,7 +34,6 @@ mod stocks {
         #[test]
         fn stock_search_returns_multiple_results() {
             EmptyContext::new().run_test(|_| {
-                rat::utils::console::init(rat::config::Verbosity::QUIET);
                 let result = scrape_stock_price("Deutsche".to_string());
 
                 // TODO: This needs to be nicer.

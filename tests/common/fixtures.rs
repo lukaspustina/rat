@@ -11,15 +11,16 @@ impl EmptyContext {
 
 #[allow(dead_code)]
 #[derive(Debug)]
-pub struct Context<'a, T: 'a> {
-    ctx: &'a T
+pub struct Context<T> {
+    pub ctx: Option<T>
 }
 
 #[allow(dead_code)]
-impl<'a, T> Context<'a, T> {
-    pub fn new(ctx: &'a T) -> Self {
-        Context { ctx: ctx }
+impl<T> Context<T> {
+    pub fn new() -> Self {
+        Context { ctx: None }
     }
+    pub fn ctx(&self) -> &T { self.ctx.as_ref().unwrap() }
 }
 
 pub trait Fixture {

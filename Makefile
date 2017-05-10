@@ -1,4 +1,4 @@
-.PHONY: all test unit clippy install_clippy kcov docker_run
+.PHONY: all test unit ignored clippy install_clippy kcov docker_run
 
 KCOV_VERSION=v33
 
@@ -9,6 +9,9 @@ test:
 
 unit:
 	cargo test --lib
+
+ignored:
+	cargo test -- --ignored
 
 clippy:
 	rustup run nightly cargo clippy

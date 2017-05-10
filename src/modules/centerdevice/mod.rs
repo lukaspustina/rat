@@ -6,7 +6,7 @@ use clap::{App, ArgMatches, SubCommand};
 pub const NAME: &'static str = "centerdevice";
 
 mod auth;
-mod client;
+pub mod client;
 mod collections;
 mod delete;
 mod download;
@@ -17,10 +17,10 @@ mod upload;
 
 #[derive(Debug, Deserialize)]
 pub struct CenterDeviceConfig {
-    client_id: String,
-    client_secret: String,
-    refresh_token: Option<String>,
-    access_token: Option<String>,
+    pub client_id: String,
+    pub client_secret: String,
+    pub refresh_token: Option<String>,
+    pub access_token: Option<String>,
 }
 
 pub fn build_sub_cli() -> App<'static, 'static> {
