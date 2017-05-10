@@ -157,7 +157,7 @@ fn status(config: &Config, details: bool) -> Result<()> {
     output(&json, &config.general.output_format, details)
 }
 
-fn get_centerdevice_status_json() -> Result<String> {
+pub fn get_centerdevice_status_json() -> Result<String> {
     let url = "http://status.centerdevice.de/details.json";
     let mut response = Client::new()
         .get(url)

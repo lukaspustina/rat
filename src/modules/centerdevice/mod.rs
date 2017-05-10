@@ -12,7 +12,7 @@ mod delete;
 mod download;
 mod refresh_token;
 mod search;
-mod status;
+pub mod status;
 mod upload;
 
 #[derive(Debug, Deserialize)]
