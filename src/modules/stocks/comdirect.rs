@@ -1,6 +1,5 @@
 use super::StockPrice;
 use net::http::tls_client;
-use utils::console::*;
 
 use hyper::header::Connection;
 use select::document::Document;
@@ -23,17 +22,22 @@ error_chain! {
     }
 }
 
-pub fn scrape_stock_prices(queries: &[&str]) -> Result<Vec<StockPrice>> {
-   queries.iter().map(|q| scrape_stock_price(q)).collect()
-}
-
-pub fn scrape_stock_price(query: &str) -> Result<StockPrice> {
+pub fn scrape_stock_price<T: FnMut(String) -> ()>(query: &str, mut progress: Option<T>) -> Result<StockPrice> {
     let parameters = &[("SEARCH_VALUE", query.to_owned())];
     let parameters_enc = serde_urlencoded::to_string(&parameters)
         .chain_err(|| "Could not encode URL parameters")?;
     let url = format!("{}?{}", BASE_URL, parameters_enc);
 
+    if let Some(p) = progress.as_mut() {
+        p("Sending search request ...".to_owned());
+    }
+
     let body = get_stock_page(&url).unwrap();
+
+    if let Some(p) = progress.as_mut() {
+        p(format!("Received {} bytes", body.len()));
+    }
+
     let stock_price = parse_stock_price(&body)?;
 
     Ok(stock_price)
@@ -41,14 +45,12 @@ pub fn scrape_stock_price(query: &str) -> Result<StockPrice> {
 
 fn get_stock_page(url: &str) -> Result<Vec<u8>> {
     let client = tls_client().chain_err(|| "Could not create TLS client")?;
-    info("Sending search request ...");
     let mut response = client.get(url).header(Connection::close()).send()
         .chain_err(|| "Could not send request")?;
 
     let mut body = Vec::new();
-    let size = response.read_to_end(&mut body)
+    let _ = response.read_to_end(&mut body)
         .chain_err(|| "Could not read response body")?;
-    info(format!("Received {} bytes body.", size));
 
     Ok(body)
 }

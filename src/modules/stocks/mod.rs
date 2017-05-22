@@ -1,9 +1,10 @@
-use config::{Config, OutputFormat};
+use config::{Config, OutputFormat, Verbosity};
 use errors::*;
 use utils::console::*;
 use utils::output;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use indicatif::{ProgressBar, ProgressStyle};
 use serde_json;
 use std::io::Write;
 use tabwriter::TabWriter;
@@ -36,8 +37,31 @@ pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     let args = cli_args.unwrap();
     let queries: Vec<&str> = args.values_of("queries").unwrap().map(|x| x).collect();
 
-    let stock_prices = comdirect::scrape_stock_prices(&queries)
-        .chain_err(|| ErrorKind::ModuleFailed(NAME.to_string()))?;
+    let mut progress_bar: Option<ProgressBar> = None;
+    let mut progress = None;
+    if config.general.output_format == OutputFormat::HUMAN && config.general.verbosity <= Verbosity::NORMAL {
+        let pb = ProgressBar::new(0);
+        pb.set_style(ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] [{bar:40.blue/blue}] {pos}/{len} ({eta}) {msg} {spinner:.blue}")
+        );
+        pb.set_length(queries.len() as u64);
+        progress_bar = Some(pb);
+        progress = Some(|str: String| {
+            progress_bar.as_ref().unwrap().set_message(&str);
+        });
+    };
+
+    let mut stock_prices: Vec<StockPrice> = vec![];
+    for query in queries {
+        let r = comdirect::scrape_stock_price(query, progress.as_ref())
+            .chain_err(|| format!("Failed to get stock price for query '{}'", query))?;
+        progress_bar.as_ref().unwrap().inc(1);
+        stock_prices.push(r)
+    }
+
+    if let Some(ref pb) = progress_bar {
+        pb.finish_with_message("done");
+    };
 
     output(&stock_prices, &config.general.output_format)
 }
