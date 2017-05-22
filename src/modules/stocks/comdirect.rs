@@ -23,8 +23,12 @@ error_chain! {
     }
 }
 
-pub fn scrape_stock_price(search: String) -> Result<StockPrice> {
-    let parameters = &[("SEARCH_VALUE", search)];
+pub fn scrape_stock_prices(queries: &[&str]) -> Result<Vec<StockPrice>> {
+   queries.iter().map(|q| scrape_stock_price(q)).collect()
+}
+
+pub fn scrape_stock_price(query: &str) -> Result<StockPrice> {
+    let parameters = &[("SEARCH_VALUE", query.to_owned())];
     let parameters_enc = serde_urlencoded::to_string(&parameters)
         .chain_err(|| "Could not encode URL parameters")?;
     let url = format!("{}?{}", BASE_URL, parameters_enc);
@@ -87,7 +91,7 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
     let stock_price = StockPrice {
         name: name.trim().to_string(),
         wkn: wkn.trim().to_string(),
-        date: date.to_string(),
+        date: date.trim().to_string(),
         price: price,
         currency: currency.trim().to_string(),
     };
@@ -145,7 +149,7 @@ mod test {
     #[test]
     fn test_parse_online_ok() {
         ::utils::console::init(::config::Verbosity::QUIET);
-        let db = scrape_stock_price("Deutsche Bank".to_string()).unwrap();
+        let db = scrape_stock_price("Deutsche Bank").unwrap();
 
         assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
         assert_eq! (db.wkn, "514000");
@@ -156,7 +160,7 @@ mod test {
     #[test]
     fn test_parse_online_with_thousand_separator() {
         ::utils::console::init(::config::Verbosity::QUIET);
-        let db = scrape_stock_price("A0X8ZS".to_string()).unwrap();
+        let db = scrape_stock_price("A0X8ZS").unwrap();
 
         assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
         assert_eq! (db.wkn, "A0X8ZS");
@@ -167,7 +171,7 @@ mod test {
     #[test]
     fn test_parse_online_no_exact_match() {
         ::utils::console::init(::config::Verbosity::QUIET);
-        let result = scrape_stock_price("Deutsche".to_string());
+        let result = scrape_stock_price("Deutsche");
 
         // TODO: This needs to be nicer.
         let result_is_not_unique = match result.unwrap_err() {
