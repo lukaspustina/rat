@@ -151,7 +151,7 @@ mod test {
     #[test]
     fn test_parse_online_ok() {
         ::utils::console::init(::config::Verbosity::QUIET);
-        let db = scrape_stock_price("Deutsche Bank").unwrap();
+        let db = scrape_stock_price("Deutsche Bank", None::<fn(_)>).unwrap();
 
         assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
         assert_eq! (db.wkn, "514000");
@@ -162,7 +162,7 @@ mod test {
     #[test]
     fn test_parse_online_with_thousand_separator() {
         ::utils::console::init(::config::Verbosity::QUIET);
-        let db = scrape_stock_price("A0X8ZS").unwrap();
+        let db = scrape_stock_price("A0X8ZS", None::<fn(_)>).unwrap();
 
         assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
         assert_eq! (db.wkn, "A0X8ZS");
@@ -173,7 +173,7 @@ mod test {
     #[test]
     fn test_parse_online_no_exact_match() {
         ::utils::console::init(::config::Verbosity::QUIET);
-        let result = scrape_stock_price("Deutsche");
+        let result = scrape_stock_price("Deutsche", None::<fn(_)>);
 
         // TODO: This needs to be nicer.
         let result_is_not_unique = match result.unwrap_err() {
