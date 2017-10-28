@@ -4,7 +4,7 @@ use net::http::tls_client;
 use hyper::header::Connection;
 use select::document::Document;
 use select::node::Node;
-use select::predicate::{Attr, Class, Element, Name, Predicate, Text};
+use select::predicate::{Class, Element, Name, Predicate, Text};
 use serde_urlencoded;
 use std::io::Read;
 
