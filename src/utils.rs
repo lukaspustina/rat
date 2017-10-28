@@ -119,7 +119,7 @@ pub mod io {
             let result = self.read.read(buf);
             if self.progress.is_some() && result.is_ok() {
                 let delta = *result.as_ref().unwrap();
-                let mut progress = self.progress.as_mut().unwrap();
+                let  progress = self.progress.as_mut().unwrap();
                 progress(self.size, delta);
             }
             result
@@ -143,7 +143,7 @@ pub mod io {
             let result = self.write.write(buf);
             if self.progress.is_some() && result.is_ok() {
                 let delta = *result.as_ref().unwrap();
-                let mut progress = self.progress.as_mut().unwrap();
+                let  progress = self.progress.as_mut().unwrap();
                 progress(self.size, delta);
             }
             result

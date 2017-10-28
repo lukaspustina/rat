@@ -28,7 +28,7 @@ pub token_endpoint: String,
 
 impl<'a> CliOAuth {
     // Step 1 -- get code
-    pub fn get_code(self, mut extra_params: &mut Vec<(&str, String)>) -> Result<Code> {
+    pub fn get_code(self, extra_params: &mut Vec<(&str, String)>) -> Result<Code> {
         info("Requesting authentication code ...");
         let mut parameters = vec!(
             ("client_id", self.client_id.clone()),
