@@ -3,7 +3,8 @@ use net::http::tls_client;
 
 use hyper::header::Connection;
 use select::document::Document;
-use select::predicate::{Attr, Class, Name, Predicate, Text};
+use select::node::Node;
+use select::predicate::{Attr, Class, Element, Name, Predicate, Text};
 use serde_urlencoded;
 use std::io::Read;
 
@@ -55,6 +56,8 @@ fn get_stock_page(url: &str) -> Result<Vec<u8>> {
     Ok(body)
 }
 
+// /html/body/div[4]/div/div[1]/div[2]/div[1]/div/div/div[1]/div/span[2]
+// body > div.cif-scope-content-wrapper.siteFrame > div > div.key-focus > div:nth-child(2) > div.col-3.col--sm-4 > div > div > div:nth-child(1) > div > span.realtime-indicator--value.text-size--xxlarge.text-weight--medium
 fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
     let document = Document::from_read(body).chain_err(|| "Could not parse HTML in response body")?;
 
@@ -66,35 +69,49 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
     let name = document.find(Name("h1")).nth(0)
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("name".to_string()))?.text();
 
-    let price_currency = document.find(Class("price")).nth(0)
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price".to_string()))?.text();
-
-    let date = document.find(Attr("id", "keyelement_kurs_update").descendant(Class("date"))).last()
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date".to_string()))?.text();
-
-    let trs = document.find(Class("clearfix").child(Name("table").and(Class("alternate_2n"))).child(Name("tbody")).child(Name("tr")));
-    let wkn: String = trs
-        .into_iter()
-        .filter(|tr| tr.find(Name("tr").child(Name("td").and(Class("left"))).child(Text)).nth(0).map_or(false, |x| x.text() == "WKN"))
-        .flat_map(|tr| tr.find(Name("tr").child(Name("td").and(Class("right"))).child(Text)).nth(0).map(|x| x.text()))
-        .nth(0)
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN".to_string()))?;
-
-    let mut pc_split = price_currency.split_whitespace();
-    let price = pc_split.nth(0)
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("price".to_string()))?
+    let price_str = document.find(Class("key-focus__quote").descendant(Class("realtime-indicator").descendant(Text))).nth(0)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price".to_string()))?
+        .text()
         .trim()
         .replace(".", "") // thousand separation
         .replace(",", ".") // decimal separation
+    ;
+    eprintln!("price_str = {:?}", price_str);
+    eprintln!("Mööp");
+    let price = price_str
         .parse()
-        .chain_err(|| ErrorKind::ComdirectScrapingFailed("price".to_string()))?;
-    let currency = pc_split.nth(0).ok_or_else(|| ErrorKind::ComdirectScrapingFailed("currency".to_string()))?;
+        .chain_err(|| ErrorKind::ComdirectScrapingFailed("parsing stock price".to_string()))?;
+
+    let currency = document.find(Class("realtime-indicator").descendant(Text)).nth(1)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock currency".to_string()))?.text();
+
+    let date_fn = |node: &Node| node.text() == "Stand";
+    let date_text = document.find(Class("key-focus").descendant(date_fn)).nth(0)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date (1)".to_string()))?
+        .parent()
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date (2)".to_string()))?
+        .find(Element).nth(1)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date (3)".to_string()))?
+        .first_child()
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date (4)".to_string()))?
+        .text();
+    let date = date_text
+        .split('-')
+        .nth(0)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date (5)".to_string()))?
+        .trim();
+
+    let wkn = document.find(Class("key-focus__info")).nth(0)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN (1)".to_string()))?
+        .last_child()
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN (2)".to_string()))?
+        .text();
 
     let stock_price = StockPrice {
         name: name.trim().to_string(),
         wkn: wkn.trim().to_string(),
         date: date.trim().to_string(),
-        price: price,
+        price,
         currency: currency.trim().to_string(),
     };
 
@@ -121,11 +138,11 @@ mod test {
         let body = get_stock_page("test/data/stocks/deutsche_bank.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
-        assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
-        assert_eq! (db.wkn, "514000");
-        assert_eq! (db.date, "10.03.17\u{a0}\u{a0}17:35:07\u{a0}Uhr");
-        assert_eq! (db.price, 18.26f32);
-        assert_eq! (db.currency, "EUR");
+        assert_eq!(db.name, "DEUTSCHE BANK");
+        assert_eq!(db.wkn, "514000");
+        assert_eq!(db.date, "27.10.17");
+        assert_eq!(db.price, 14.16f32);
+        assert_eq!(db.currency, "EUR");
     }
 
     #[test]
@@ -133,11 +150,11 @@ mod test {
         let body = get_stock_page("test/data/stocks/amunid_thousand_period.html").unwrap();
         let db = parse_stock_price(&body).unwrap();
 
-        assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
-        assert_eq! (db.wkn, "A0X8ZS");
-        assert_eq! (db.date, "11.04.17\u{a0}\u{a0}17:36:18\u{a0}Uhr");
-        assert_eq! (db.price, 1359.80f32);
-        assert_eq! (db.currency, "EUR");
+        assert_eq!(db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
+        assert_eq!(db.wkn, "A0X8ZS");
+        assert_eq!(db.date, "27.10.17");
+        assert_eq!(db.price, 1396.47f32);
+        assert_eq!(db.currency, "EUR");
     }
 
     #[test]
@@ -145,7 +162,7 @@ mod test {
         let body = get_stock_page("test/data/stocks/no_exact_match.html").unwrap();
         let db = parse_stock_price(&body);
 
-        assert! (db.is_err());
+        assert!(db.is_err());
     }
 
     #[test]
@@ -153,10 +170,10 @@ mod test {
         ::utils::console::init(::config::Verbosity::QUIET);
         let db = scrape_stock_price("Deutsche Bank", None::<fn(_)>).unwrap();
 
-        assert_eq! (db.name, "Deutsche Bank AG Namens-Aktien o.N.");
-        assert_eq! (db.wkn, "514000");
-        assert! (db.price > 0.00f32);
-        assert_eq! (db.currency, "EUR");
+        assert_eq!(db.name, "DEUTSCHE BANK");
+        assert_eq!(db.wkn, "514000");
+        assert!(db.price > 0.00f32);
+        assert_eq!(db.currency, "EUR");
     }
 
     #[test]
@@ -164,10 +181,10 @@ mod test {
         ::utils::console::init(::config::Verbosity::QUIET);
         let db = scrape_stock_price("A0X8ZS", None::<fn(_)>).unwrap();
 
-        assert_eq! (db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
-        assert_eq! (db.wkn, "A0X8ZS");
-        assert! (db.price > 0.00_f32);
-        assert_eq! (db.currency, "EUR");
+        assert_eq!(db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
+        assert_eq!(db.wkn, "A0X8ZS");
+        assert!(db.price > 0.00_f32);
+        assert_eq!(db.currency, "EUR");
     }
 
     #[test]
@@ -180,6 +197,6 @@ mod test {
             Error(ErrorKind::ComdirectSearchResultNotUnique, _) => true,
             _ => false
         };
-        assert! (result_is_not_unique);
+        assert!(result_is_not_unique);
     }
 }
