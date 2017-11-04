@@ -43,8 +43,8 @@ fn auth(config: &Config, open_browser: bool) -> Result<()> {
     let oauth = CliOAuth {
         client_id: config.centerdevice.client_id.clone(),
         client_secret: config.centerdevice.client_secret.clone(),
-        auth_endpoint: "https://auth.centerdevice.de/authorize".to_string(),
-        token_endpoint: "https://auth.centerdevice.de/token".to_string(),
+        auth_endpoint: "https://auth.cloud-wurst.de/authorize".to_string(),
+        token_endpoint: "https://auth.cloud-wurst.de/token".to_string(),
         redirect_uri: REDIRECT_URI.to_string(),
         open_browser: open_browser,
     };

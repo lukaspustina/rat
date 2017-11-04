@@ -95,7 +95,7 @@ pub mod collections {
             parameters.push(("name", name.unwrap().to_string()))
         }
         let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
-        let url = format!("https://api.centerdevice.de/v2/collections?{}", parameters_enc);
+        let url = format!("https://api.cloud-wurst.de/v2/collections?{}", parameters_enc);
 
         verboseln(format!("collections search = {}", url));
 
@@ -158,7 +158,7 @@ mod delete {
         let delete = DeleteAction::new(document_ids);
         let delete_json = serde_json::to_string(&delete).chain_err(|| "JSON serialization failed")?;
 
-        let url = "https://api.centerdevice.de/v2/documents";
+        let url = "https://api.cloud-wurst.de/v2/documents";
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
         let request = prepare_request(&client, Method::Post, url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?
@@ -226,7 +226,7 @@ mod download {
         document_id: &str,
         progress: Option<T>,
     ) -> Result<()> {
-        let url = format!("https://api.centerdevice.de/v2/document/{}", document_id);
+        let url = format!("https://api.cloud-wurst.de/v2/document/{}", document_id);
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
         let request = prepare_request(&client, Method::Get, &url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?
@@ -318,7 +318,7 @@ mod refresh_token {
 
     fn do_refresh_token(refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
         let body = format!("grant_type=refresh_token&refresh_token={}", refresh_token);
-        let url = "https://auth.centerdevice.de/token";
+        let url = "https://auth.cloud-wurst.de/token";
         let client = tls_client().chain_err(|| "Could not create TLS client")?;
         let mut response = client
             .post(url)
@@ -442,7 +442,7 @@ pub mod search {
 
         verboseln(format!("search = '{:?}'", search_json));
 
-        let url = "https://api.centerdevice.de/v2/documents";
+        let url = "https://api.cloud-wurst.de/v2/documents";
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
         let request = prepare_request(&client, Method::Post, url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?
@@ -561,7 +561,7 @@ mod upload {
 
         let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
         let connector = HttpsConnector::new(ssl);
-        let url = ::hyper::Url::parse("https://api.centerdevice.de/v2/documents").chain_err(|| "Failed to parse URL")?;
+        let url = ::hyper::Url::parse("https://api.cloud-wurst.de/v2/documents").chain_err(|| "Failed to parse URL")?;
         let mut client = Request::with_connector(Method::Post, url, &connector).chain_err(|| "Failed to create client")?;
         client.headers_mut().set(Authorization(Bearer { token: access_token.to_string() }));
         client.headers_mut().set(ContentType(mime!(Multipart / FormData; Boundary = (boundary))));
