@@ -60,7 +60,9 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
             pb.inc(delta as u64);
         });
     };
-    client::download_document(config.centerdevice.access_token.as_ref().unwrap(), filename, doc_id, progress)
+    client::download_document(
+        &config.centerdevice.api_base_url,
+        config.centerdevice.access_token.as_ref().unwrap(), filename, doc_id, progress)
         .chain_err(|| ErrorKind::CenterDeviceDownloadFailed)?;
 
     if let Some(ref pb) = progress_bar {

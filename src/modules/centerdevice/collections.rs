@@ -62,6 +62,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         info("Including public collections");
     }
     let json = client::search_collections(
+        &config.centerdevice.api_base_url,
         config.centerdevice.access_token.as_ref().unwrap(), name, include_public, filter)
         .chain_err(|| ErrorKind::CenterDeviceCollectionFailed)?;
 

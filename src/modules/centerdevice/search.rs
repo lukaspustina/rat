@@ -66,6 +66,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
         info("Including public collections");
     }
     let json = client::search_documents(
+        &config.centerdevice.api_base_url,
         config.centerdevice.access_token.as_ref().unwrap(), filenames, tags, fulltext, named)
         .chain_err(|| ErrorKind::CenterDeviceSearchFailed)?;
 

@@ -139,6 +139,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
     info(format!("Uploading file '{}' ...", filename));
     let json = client::upload_document(
+        &config.centerdevice.api_base_url,
         config.centerdevice.access_token.as_ref().unwrap(),
         file_path,
         filename,

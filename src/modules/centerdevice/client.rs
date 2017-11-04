@@ -64,12 +64,13 @@ pub mod collections {
     }
 
     pub fn search_collections(
+        api_base_url: &str,
         access_token: &str,
         name: Option<&str>,
         include_public: bool,
         filter: Option<&str>
     ) -> Result<String> {
-        let json = do_search_collections(access_token, name, include_public)
+        let json = do_search_collections(api_base_url, access_token, name, include_public)
             .chain_err(|| ErrorKind::HttpCollectionCallFailed);
         if filter.is_none() {
             return json;
@@ -84,6 +85,7 @@ pub mod collections {
     }
 
     fn do_search_collections(
+        api_base_url: &str,
         access_token: &str,
         name: Option<&str>,
         include_public: bool
@@ -95,7 +97,8 @@ pub mod collections {
             parameters.push(("name", name.unwrap().to_string()))
         }
         let parameters_enc = serde_urlencoded::to_string(&parameters).chain_err(|| "URL serialization failed")?;
-        let url = format!("https://api.cloud-wurst.de/v2/collections?{}", parameters_enc);
+
+        let url = format!("https://api.{}/v2/collections?{}", api_base_url, parameters_enc);
 
         verboseln(format!("collections search = {}", url));
 
@@ -150,17 +153,17 @@ mod delete {
         }
     }
 
-    pub fn delete_documents(access_token: &str, document_ids: Vec<&str>) -> Result<String> {
-        do_delete_documents(access_token, document_ids).chain_err(|| ErrorKind::HttpUploadCallFailed)
+    pub fn delete_documents(api_base_url: &str, access_token: &str, document_ids: Vec<&str>) -> Result<String> {
+        do_delete_documents(api_base_url, access_token, document_ids).chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
 
-    fn do_delete_documents(access_token: &str, document_ids: Vec<&str>) -> Result<String> {
+    fn do_delete_documents(api_base_url: &str, access_token: &str, document_ids: Vec<&str>) -> Result<String> {
         let delete = DeleteAction::new(document_ids);
         let delete_json = serde_json::to_string(&delete).chain_err(|| "JSON serialization failed")?;
 
-        let url = "https://api.cloud-wurst.de/v2/documents";
+        let url = format!("https://api.{}/v2/documents", api_base_url);
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
-        let request = prepare_request(&client, Method::Post, url, access_token.to_string())
+        let request = prepare_request(&client, Method::Post, &url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?
             .header(ContentType(mime!(Application / Json)))
             .header(Accept(vec![qitem(mime!(Application/ Json; Charset = Utf8))]))
@@ -211,22 +214,24 @@ mod download {
 
 
     pub fn download_document<T: FnMut(usize, usize) -> ()>(
+        api_base_url: &str,
         access_token: &str,
         filename: Option<&str>,
         document_id: &str,
         progress: Option<T>,
     ) -> Result<()> {
-        do_download_document(access_token, filename, document_id, progress)
+        do_download_document(api_base_url, access_token, filename, document_id, progress)
             .chain_err(|| ErrorKind::HttpDownloadCallFailed)
     }
 
     fn do_download_document<T: FnMut(usize, usize) -> ()>(
+        api_base_url: &str,
         access_token: &str,
         filename: Option<&str>,
         document_id: &str,
         progress: Option<T>,
     ) -> Result<()> {
-        let url = format!("https://api.cloud-wurst.de/v2/document/{}", document_id);
+        let url = format!("https://api.{}/v2/document/{}", api_base_url, document_id);
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
         let request = prepare_request(&client, Method::Get, &url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?
@@ -312,16 +317,16 @@ mod refresh_token {
         }
     }
 
-    pub fn refresh_token(refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
-        do_refresh_token(refresh_token, client_id, client_secret).chain_err(|| ErrorKind::HttpUploadCallFailed)
+    pub fn refresh_token(api_base_url: &str, refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
+        do_refresh_token(api_base_url, refresh_token, client_id, client_secret).chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
 
-    fn do_refresh_token(refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
+    fn do_refresh_token(api_base_url: &str, refresh_token: &str, client_id: &str, client_secret: &str) -> Result<String> {
         let body = format!("grant_type=refresh_token&refresh_token={}", refresh_token);
-        let url = "https://auth.cloud-wurst.de/token";
+        let url = format!("https://auth.{}/token", api_base_url);
         let client = tls_client().chain_err(|| "Could not create TLS client")?;
         let mut response = client
-            .post(url)
+            .post(&url)
             .header(Authorization(Basic { username: client_id.to_string(), password: Some(client_secret.to_string()) }))
             .header(ContentType(mime!(Application / WwwFormUrlEncoded)))
             .body(&body)
@@ -414,16 +419,18 @@ pub mod search {
     }
 
     pub fn search_documents(
+        api_base_url: &str,
         access_token: &str,
         filenames: Option<Vec<&str>>,
         tags: Option<Vec<&str>>,
         fulltext: Option<&str>,
         named_searches: NamedSearches) -> Result<String> {
-        do_search_documents(access_token, filenames, tags, fulltext, named_searches)
+        do_search_documents(api_base_url, access_token, filenames, tags, fulltext, named_searches)
             .chain_err(|| ErrorKind::HttpSearchCallFailed)
     }
 
     fn do_search_documents(
+        api_base_url: &str,
         access_token: &str,
         filenames: Option<Vec<&str>>,
         tags: Option<Vec<&str>>,
@@ -442,9 +449,9 @@ pub mod search {
 
         verboseln(format!("search = '{:?}'", search_json));
 
-        let url = "https://api.cloud-wurst.de/v2/documents";
+        let url = format!("https://api.{}/v2/documents", api_base_url);
         let client = tls_client().chain_err(|| "Failed to create HTTP client")?;
-        let request = prepare_request(&client, Method::Post, url, access_token.to_string())
+        let request = prepare_request(&client, Method::Post, &url, access_token.to_string())
             .chain_err(|| "Failed to create CenterDevice client")?
             .header(ContentType(mime!(Application / Json)))
             .header(Accept(vec![qitem(mime!(Application/ Json; Charset = Utf8))]))
@@ -530,6 +537,7 @@ mod upload {
     }
 
     pub fn upload_document<T: FnMut(usize, usize) -> ()>(
+        api_base_url: &str,
         access_token: &str,
         file: &Path,
         filename: &str,
@@ -539,11 +547,12 @@ mod upload {
         collections: Option<Vec<&str>>,
         progress: Option<T>,
     ) -> Result<String> {
-        do_upload_document(access_token, file, filename, mime, title, tags, collections, progress)
+        do_upload_document(api_base_url, access_token, file, filename, mime, title, tags, collections, progress)
             .chain_err(|| ErrorKind::HttpUploadCallFailed)
     }
 
     fn do_upload_document<T: FnMut(usize, usize) -> ()>(
+        api_base_url: &str,
         access_token: &str,
         file: &Path,
         filename: &str,
@@ -561,7 +570,8 @@ mod upload {
 
         let ssl = NativeTlsClient::new().chain_err(|| "Failed to create TLS client")?;
         let connector = HttpsConnector::new(ssl);
-        let url = ::hyper::Url::parse("https://api.cloud-wurst.de/v2/documents").chain_err(|| "Failed to parse URL")?;
+        let url_str = format!("https://api.{}/v2/documents", api_base_url);
+        let url = ::hyper::Url::parse(&url_str).chain_err(|| "Failed to parse URL")?;
         let mut client = Request::with_connector(Method::Post, url, &connector).chain_err(|| "Failed to create client")?;
         client.headers_mut().set(Authorization(Bearer { token: access_token.to_string() }));
         client.headers_mut().set(ContentType(mime!(Multipart / FormData; Boundary = (boundary))));

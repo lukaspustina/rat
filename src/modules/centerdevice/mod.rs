@@ -21,6 +21,12 @@ pub struct CenterDeviceConfig {
     client_secret: String,
     refresh_token: Option<String>,
     access_token: Option<String>,
+    #[serde(default = "default_api_base_url")]
+    api_base_url: String,
+}
+
+fn default_api_base_url() -> String {
+    "centerdevice.de".to_string()
 }
 
 pub fn build_sub_cli() -> App<'static, 'static> {

@@ -40,11 +40,14 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 }
 
 fn auth(config: &Config, open_browser: bool) -> Result<()> {
+    let auth_endpoint = format!("https://auth.{}/authorize", config.centerdevice.api_base_url);
+    let token_endpoint = format!("https://auth.{}/token", config.centerdevice.api_base_url);
+
     let oauth = CliOAuth {
         client_id: config.centerdevice.client_id.clone(),
         client_secret: config.centerdevice.client_secret.clone(),
-        auth_endpoint: "https://auth.cloud-wurst.de/authorize".to_string(),
-        token_endpoint: "https://auth.cloud-wurst.de/token".to_string(),
+        auth_endpoint,
+        token_endpoint,
         redirect_uri: REDIRECT_URI.to_string(),
         open_browser: open_browser,
     };
