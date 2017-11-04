@@ -33,6 +33,7 @@ pub fn build_sub_cli() -> App<'static, 'static> {
 pub fn call(_: Option<&ArgMatches>, config: &Config) -> Result<()> {
     info(format!("Refreshing access token"));
     let json = client::refresh_token(
+        &config.centerdevice.api_base_url,
         config.centerdevice.refresh_token.as_ref().unwrap(),
         &config.centerdevice.client_id,
         &config.centerdevice.client_secret,

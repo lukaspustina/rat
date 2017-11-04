@@ -44,6 +44,7 @@ pub fn call(args: Option<&ArgMatches>, config: &Config) -> Result<()> {
 
     info(format!("Deleting documents with ids '{:?}' ...", document_ids));
     let json = client::delete_documents(
+        &config.centerdevice.api_base_url,
         config.centerdevice.access_token.as_ref().unwrap(),
         document_ids
     ).chain_err(|| ErrorKind::CenterDeviceDeleteFailed)?;
