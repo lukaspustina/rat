@@ -61,9 +61,11 @@ fn get_stock_page(url: &str) -> Result<Vec<u8>> {
 fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
     let document = Document::from_read(body).chain_err(|| "Could not parse HTML in response body")?;
 
-    let no_exact_match = document.find(Class("Informer")).nth(0).is_some();
-    if no_exact_match {
-        bail!(ErrorKind::ComdirectSearchResultNotUnique);
+    let no_exact_match = document.find(Name("h1")).nth(0);
+    if let Some(heading) = no_exact_match {
+        if heading.text() == "Wertpapiersuche und Kursabfrage" {
+            bail!(ErrorKind::ComdirectSearchResultNotUnique);
+        }
     }
 
     let name = document.find(Name("h1")).nth(0)
