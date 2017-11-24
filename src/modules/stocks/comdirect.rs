@@ -74,10 +74,7 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
         .text()
         .trim()
         .replace(".", "") // thousand separation
-        .replace(",", ".") // decimal separation
-    ;
-    eprintln!("price_str = {:?}", price_str);
-    eprintln!("Mööp");
+        .replace(",", "."); // decimal separation
     let price = price_str
         .parse()
         .chain_err(|| ErrorKind::ComdirectScrapingFailed("parsing stock price".to_string()))?;
