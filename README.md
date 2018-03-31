@@ -2,7 +2,7 @@
 
 ## RAT - the Rest Api Tool
 
-Rat is a simple command line tool that helps me automate repetitive tasks for my favorite web services and software products which expose a REST API. The general guideline for all commands rat supports is that they should perform only one thing preferably with one HTTP call only. This guideline follows the UNIX principle that tools should to one thing and complex behaviour is achieved by pipelining.
+Rat is a simple command line tool that helps me automate repetitive tasks for my favorite web services and software products which expose a REST API. The general guideline for all commands rat supports is that they should perform only one thing preferably with one HTTP call only. This guideline follows the UNIX principle that tools should do one thing and complex behaviour is achieved by pipelining.
 
 [![Linux & OS X Build Status](https://img.shields.io/travis/lukaspustina/rat.svg?label=Linux%20%26%20OS%20X%20Build%20Status)](https://travis-ci.org/lukaspustina/rat) [![Windows Build status](https://img.shields.io/appveyor/ci/lukaspustina/rat.svg?label=Windows%20Build%20Status)](https://ci.appveyor.com/project/lukaspustina/rat/branch/master) [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg?label=License)](./LICENSE) [![](http://meritbadge.herokuapp.com/rat)](https://crates.io/crates/rat)
 
