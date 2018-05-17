@@ -339,7 +339,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "humantime"
-version = "1.0.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "quick-error 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -694,7 +694,7 @@ dependencies = [
  "chrono 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.27.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "humantime 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "humantime 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.10.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper-native-tls 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "indicatif 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1223,7 +1223,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum gcc 0.3.54 (registry+https://github.com/rust-lang/crates.io-index)" = "5e33ec290da0d127825013597dbdfc28bee4964690c7ce1166cbc2a7bd08b1bb"
 "checksum html5ever 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a49d5001dd1bddf042ea41ed4e0a671d50b1bf187e66b349d7ec613bdce4ad90"
 "checksum httparse 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "af2f2dd97457e8fb1ae7c5a420db346af389926e36f43768b96f101546b04a07"
-"checksum humantime 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0e9298fffb2a54569e1fcb818e9c2ff77caa2fad68d64b6e409b9f777bdb1960"
+"checksum humantime 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0484fda3e7007f2a4a0d9c3a703ca38c71c54c55602ce4660c419fd32e188c9e"
 "checksum hyper 0.10.13 (registry+https://github.com/rust-lang/crates.io-index)" = "368cb56b2740ebf4230520e2b90ebb0461e69034d85d1945febd9b3971426db2"
 "checksum hyper-native-tls 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)" = "72332e4a35d3059583623b50e98e491b78f8b96c5521fcb3f428167955aa56e8"
 "checksum idna 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "014b298351066f1512874135335d62a789ffe78a9974f94b43ed5621951eaf7d"
