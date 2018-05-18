@@ -9,7 +9,7 @@ use serde_json;
 use std::io::Write;
 use tabwriter::TabWriter;
 
-mod comdirect;
+pub mod comdirect;
 
 pub const NAME: &'static str = "stocks";
 
