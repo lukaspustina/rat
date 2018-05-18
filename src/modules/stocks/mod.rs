@@ -55,7 +55,9 @@ pub fn call(cli_args: Option<&ArgMatches>, config: &Config) -> Result<()> {
     for query in queries {
         let r = comdirect::scrape_stock_price(query, progress.as_ref())
             .chain_err(|| format!("Failed to get stock price for query '{}'", query))?;
-        progress_bar.as_ref().unwrap().inc(1);
+        if let Some(ref pb) = progress_bar {
+            pb.inc(1);
+        }
         stock_prices.push(r)
     }
 
