@@ -68,10 +68,10 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
         }
     }
 
-    let name = document.find(Name("h1")).nth(0)
+    let name = document.find(Name("h1").descendant(Text)).nth(0)
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("name".to_string()))?.text();
 
-    let price_str = document.find(Class("key-focus__quote").descendant(Class("realtime-indicator").descendant(Text))).nth(0)
+    let price_str = document.find(Class("key-focus__quote").descendant(Class("realtime-indicator")).descendant(Text)).nth(0)
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price".to_string()))?
         .text()
         .trim()
@@ -100,10 +100,8 @@ fn parse_stock_price(body: &[u8]) -> Result<StockPrice> {
         .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock price date (5)".to_string()))?
         .trim();
 
-    let wkn = document.find(Class("key-focus__info")).nth(0)
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN (1)".to_string()))?
-        .last_child()
-        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN (2)".to_string()))?
+    let wkn = document.find(Class("key-focus__info").descendant(Name("h2")).descendant(Text)).nth(2)
+        .ok_or_else(|| ErrorKind::ComdirectScrapingFailed("stock WKN".to_string()))?
         .text();
 
     let stock_price = StockPrice {
@@ -139,8 +137,8 @@ mod test {
 
         assert_eq!(db.name, "DEUTSCHE BANK");
         assert_eq!(db.wkn, "514000");
-        assert_eq!(db.date, "27.10.17");
-        assert_eq!(db.price, 14.16f32);
+        assert_eq!(db.date, "22.06.18");
+        assert_eq!(db.price, 9.473f32);
         assert_eq!(db.currency, "EUR");
     }
 
@@ -151,8 +149,8 @@ mod test {
 
         assert_eq!(db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
         assert_eq!(db.wkn, "A0X8ZS");
-        assert_eq!(db.date, "27.10.17");
-        assert_eq!(db.price, 1396.47f32);
+        assert_eq!(db.date, "22.06.18");
+        assert_eq!(db.price, 1594.8f32);
         assert_eq!(db.currency, "EUR");
     }
 
