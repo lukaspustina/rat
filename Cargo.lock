@@ -757,7 +757,7 @@ dependencies = [
  "serde_derive 0.9.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 0.9.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_urlencoded 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "tabwriter 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tabwriter 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "term-painter 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "webbrowser 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1010,7 +1010,7 @@ dependencies = [
 
 [[package]]
 name = "tabwriter"
-version = "1.0.4"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "unicode-width 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1373,7 +1373,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum syn 0.11.11 (registry+https://github.com/rust-lang/crates.io-index)" = "d3b891b9015c88c576343b9b3e41c2c11a51c219ef067b264bd9c8aa9b441dad"
 "checksum syn 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6dfd71b2be5a58ee30a6f8ea355ba8290d397131c00dfa55c3d34e6e13db5101"
 "checksum synom 0.11.3 (registry+https://github.com/rust-lang/crates.io-index)" = "a393066ed9010ebaed60b9eafa373d4b1baac186dd7e008555b0f702b51945b6"
-"checksum tabwriter 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "56ab9ac71e2a71d113e4568ab0a89e2182f0fc214d2e4952c6e5655cb8eac4dd"
+"checksum tabwriter 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9128e3a9149e51494cad59712a286e149fcb74e443d2298d69bd6eaa42cc4ebb"
 "checksum tempdir 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)" = "15f2b5fb00ccdf689e0149d1b1b3c03fead81c2b37735d812fa8bddbbf41b6d8"
 "checksum tendril 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8c1b72f8e2f5b73b65c315b1a70c730f24b9d7a25f39e98de8acbe2bb795caea"
 "checksum term 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)" = "fa63644f74ce96fbeb9b794f66aff2a52d601cbd5e80f4b97123e3899f4570f1"
