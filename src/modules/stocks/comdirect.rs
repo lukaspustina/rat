@@ -178,7 +178,7 @@ mod test {
         ::utils::console::init(::config::Verbosity::QUIET);
         let db = scrape_stock_price("A0X8ZS", None::<fn(_)>).unwrap();
 
-        assert_eq!(db.name, "AMUNDI ETF LEVERAGED MSCI USA DAILY UCITS ETF - EUR ACC");
+        assert_eq!(db.name, "Amundi ETF Leveraged MSCI USA Daily UCITS ETF - EUR ACC");
         assert_eq!(db.wkn, "A0X8ZS");
         assert!(db.price > 0.00_f32);
         assert_eq!(db.currency, "EUR");
