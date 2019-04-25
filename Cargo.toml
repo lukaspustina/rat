@@ -24,7 +24,7 @@ path = "src/main.rs"
 
 [dependencies]
 base64 = "~0.4.0"
-chrono = "0.3"
+chrono = "0.4"
 clap = "2"
 error-chain = "0.11"
 humantime = "1.0.0"
