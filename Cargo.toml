@@ -42,7 +42,7 @@ serde_derive = "0.9"
 serde_json = "0.9"
 serde_urlencoded = "0.4"
 tabwriter = "1.0"
-toml = "0.3"
+toml = "0.5"
 term-painter = "0.2"
 webbrowser = "0.2"
 
