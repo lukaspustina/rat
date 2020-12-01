@@ -44,7 +44,7 @@ serde_urlencoded = "0.4"
 tabwriter = "1.0"
 toml = "0.3"
 term-painter = "0.2"
-webbrowser = "0.2"
+webbrowser = "0.5"
 
 [dev-dependencies]
 pretty_assertions = "0.1"
